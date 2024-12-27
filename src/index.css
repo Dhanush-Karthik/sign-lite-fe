@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+}
+
+:root {
+  --f7-font-family: 'DM Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.page-container {
+  padding-top: env(safe-area-inset-top, 44px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  /* padding-bottom: env(safe-area-inset-bottom, 34px); */
+}
+
+div,
+svg,
+button,
+textarea,
+input,
+select,
+a {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+  background: transparent;
+  /* inherit font &color from ancestor */
+  color: inherit;
+  font: inherit;
+  /*Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+  line-height: normal;
+  /* Corrects font smoothing for webkit */
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+  /* Corrects inability to style clickable `input` types in iOS */
+  -webkit-appearance: none;
+}
+
+/* spinner */
+.spinner {
+  opacity: 0;
+  animation-name: rotate, fadeIn;
+  animation-duration: 450ms, 600ms;
+  animation-timing-function: linear, ease;
+  animation-iteration-count: infinite, 1;
+  /* animation-delay: 400ms; */
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.react-pdf__Page__canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+.draggable {
+  z-index: 40;
+  position: absolute;
+}
+
+/* Skeleton style */
+.item-content {
+  padding-left: 0 !important;
+}
+
+.item-media {
+  padding: 0 !important;
+}
+
+.item-inner {
+  padding: 0 !important;
+  margin-left: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  gap: 8px;
+}
+
+.skeleton-text ul {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 40px;
+}
+
+.item-title-row {
+  height: 20px !important;
+}
+
+.item-text {
+  height: 16px !important;
+}
