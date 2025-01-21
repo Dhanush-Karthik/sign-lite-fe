@@ -1,6 +1,5 @@
 import { App as MyApp, View } from "framework7-react";
 import { Framework7Parameters } from "framework7/types";
-import useOpenid from "./core/hooks/useOpenid";
 import Spinner from "./components/Spinner";
 import { CALLBACK_URL } from "./constants";
 import RequestSignature from "./pages/RequestSignature";
