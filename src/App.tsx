@@ -35,7 +35,7 @@ const routes = [
 ];
 
 function App() {
-  const [isReady] = useOpenid();
+  const [isReady] = [true];
   const f7params: Framework7Parameters = {
     name: "Sign & List", // App name
     routes, // App routes
