@@ -7,6 +7,8 @@ import CrossIcon from "@/assets/crossIcon.svg";
 import { useAppDispatch } from "@/core/redux/store";
 import jsPDF from "jspdf"; // Library for creating PDFs
 import { nonceGenerator } from "@/core/utils";
+import axios from "axios";
+import { API_BASE_URL } from "@/constants";
 
 const RequestSignaturesStep = ({
   close,
@@ -20,8 +22,8 @@ const RequestSignaturesStep = ({
 
   useEffect(() => {
     if (selectedFile) {
-      dispatch.doc.setDoc({ signatureFile: selectedFile });
-      f7.views.main.router.navigate("/request-signature");
+      dispatch.multidoc.setDoc({ signatureFile: selectedFile , signers: []});
+      f7.views.main.router.navigate("/addNominee");
       close();
     }
   }, [selectedFile]);

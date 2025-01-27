@@ -20,6 +20,7 @@ const DraggableIcon = ({
   const dispatch = useAppDispatch();
 
   const handleStop: DraggableEventHandler = (_, data) => {
+    console.log("Moving " + pageNumber);
     if (!setSign || !pageNumber) return;
     const canvas = document.querySelector(
       `.react-pdf__Page[data-page-number="${pageNumber}"] canvas`
@@ -28,6 +29,12 @@ const DraggableIcon = ({
     if (!canvas) return;
 
     const canvasRect = canvas.getBoundingClientRect();
+    console.log("Data: ");
+    console.log(data);
+    console.log("Canvas rect: ");
+    console.log(canvasRect);
+    console.log("Surface area: ");
+    console.log(safeAreas);
 
     const topLeftXCoordinate = data.x - 16; // subtract 16 padding, add icon width to react top-right-x-coordinate
     const topLeftYCoordinateFromPageBottomLeftCorner =
@@ -36,21 +43,7 @@ const DraggableIcon = ({
       canvasRectHeight: canvasRect.height,
       canvasRectWidth: canvasRect.width,
     });
-    // const topLeftYCoordinateFromPageTopLeftCorner = data.y - canvasRect.top + 80;
-    // let topLeftXCoordinate = ((data.x - 16 + 64) * 100) / (canvasRect.width - 32);
-    // if (topLeftXCoordinate > 100) topLeftXCoordinate = 100;
-    // else if (topLeftXCoordinate < 0) topLeftXCoordinate = 0;
-    // let topLeftYCoordinate = ((canvasRect.bottom - data.y - 80) * 100) / canvasRect.height;
-    // if (topLeftYCoordinate > 100) topLeftYCoordinate = 100;
-    // else if (topLeftYCoordinate < 0) topLeftYCoordinate = 0;
 
-    // window.alert(
-    //   JSON.stringify({
-    //     topLeftXCoordinate,
-    //     topLeftYCoordinateFromPageBottomLeftCorner,
-    //     pageNumber,
-    //   })
-    // );
     setSign({
       topLeftXCoordinate,
       topLeftYCoordinateFromPageBottomLeftCorner,

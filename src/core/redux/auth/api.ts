@@ -23,6 +23,7 @@ class AuthManager {
     });
 
     const userInfo: UserType = response.data;
+    console.log(response.data);
     return userInfo;
   };
 }

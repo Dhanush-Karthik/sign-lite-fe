@@ -21,29 +21,30 @@ export type DraggableStateType =
     }
   | undefined;
 
+type Signer = {
+  name: string;
+  email: string;
+  pageNumber?: number;
+  bottomLeftXCoordinate?: number;
+  bottomLeftYCoordinate?: number;
+  topRightXCoordinate?: number;
+  topRightYCoordinate?: number;
+};
+
+type SignerPositionState = {
+  [email: string]: {
+    pageNumber: number;
+    bottomLeftXCoordinate: number;
+    bottomLeftYCoordinate: number;
+  };
+};
+
 const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) => {
   const [pageCounts, setPageCounts] = useState();
-  const requesteeDocState = useAppSelector((state) => state.doc); // One more left
-  const nomineeDocState = useAppSelector((state) => state.doc);
+  const requesteeDocState = useAppSelector((state) => state.multidoc); // One more left
+  const docState = useAppSelector((state) => state.multidoc);
   const dispatch = useAppDispatch();
-  const requesteeCoordinates: DraggableStateType =
-    requesteeDocState?.pageNumber && requesteeDocState.bottomLeftXCoordinate && requesteeDocState.bottomLeftYCoordinate
-      ? {
-          pageNumber: requesteeDocState.pageNumber,
-          topLeftXCoordinate: requesteeDocState.bottomLeftXCoordinate,
-          topLeftYCoordinateFromPageBottomLeftCorner: requesteeDocState.bottomLeftYCoordinate + 24,
-        }
-      : undefined;
-  const nomineeCoordinates: DraggableStateType =
-      nomineeDocState?.pageNumber && nomineeDocState.bottomLeftXCoordinate && nomineeDocState.bottomLeftYCoordinate
-      ? {
-          pageNumber: nomineeDocState.pageNumber,
-          topLeftXCoordinate: nomineeDocState.bottomLeftXCoordinate,
-          topLeftYCoordinateFromPageBottomLeftCorner: nomineeDocState.bottomLeftYCoordinate + 24,
-        }
-      : undefined;
-  const [requesteeDraggableState, setRequesteeDraggableState] = useState<DraggableStateType>();
-  const [nomineeDraggableState, setNomineeDraggableState] = useState<DraggableStateType>();
+
   const [visiblePage, setVisiblePage] = useState<number>();
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [step, setStep] = useState<"signStep" | "checkStep">("signStep");
@@ -53,14 +54,40 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
 
   const onDocumentLoadSuccess = (pdf: any) => setPageCounts(pdf._pdfInfo.numPages);
 
+  const [draggableStates, setDraggableStates] = useState<Record<string, DraggableStateType>>({});
+
+  const setDraggableStateForSigner = (signerId: string, newState: DraggableStateType) => {
+    console.log(newState);
+    setDraggableStates((prevStates) => ({
+      ...prevStates,
+      [signerId]: newState,
+    }));
+  };
+
   useEffect(() => {
-    if (requesteeCoordinates && nomineeCoordinates) {
-      setStep("checkStep");
-      setRequesteeDraggableState(requesteeCoordinates);
-      setNomineeDraggableState(nomineeCoordinates);
-      setShowSignIcon(true);
+    if (docState?.signers) {
+      console.log(docState?.signers);
+      const initialStates = docState.signers.reduce((acc, signer) => {
+        console.log(signer);
+        if (
+          signer.pageNumber &&
+          signer.bottomLeftXCoordinate &&
+          signer.bottomLeftYCoordinate
+        ) {
+          acc[signer.email] = {
+            pageNumber: signer.pageNumber,
+            topLeftXCoordinate: signer.bottomLeftXCoordinate,
+            topLeftYCoordinateFromPageBottomLeftCorner:
+              signer.bottomLeftYCoordinate + 24,
+          };
+        } else {
+          acc[signer.email] = undefined;
+        }
+        return acc;
+      }, {} as Record<string, DraggableStateType>);
+      setDraggableStates(initialStates);
     }
-  }, [f7router.currentRoute.path]);
+  }, [docState?.signers]);
 
   // Use IntersectionObserver to detect when a page enters or leaves the viewport
   useEffect(() => {
@@ -70,8 +97,6 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
           if (entry.isIntersecting) {
             const pageNumber = Number(entry.target.getAttribute("data-page-number"));
             setVisiblePage(pageNumber); // Set the page number that is visible
-            setRequesteeDraggableState(undefined);
-            setNomineeDraggableState(undefined);
           }
         });
       },
@@ -112,12 +137,12 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
             key={step}
           >
             <>
-              {step === "signStep" && showSignIcon && (
-                <DraggableIcon pageNumber={visiblePage} setSign={(e) => setRequesteeDraggableState(e)} text="Your Sign" width={97}/>
-              )}
-              {step === "signStep" && showSignIcon && (
-                <DraggableIcon pageNumber={visiblePage} setSign={(e) => setNomineeDraggableState(e)} text="Nominee Sign" width={120}/>
-              )}
+              {
+                step === "signStep" && showSignIcon && docState?.signers.map((signer) => {
+                  return <DraggableIcon pageNumber={visiblePage} setSign={(e) => setDraggableStateForSigner(signer.email, e)} text={signer.name} width={97}/>
+                })
+              }
+              
               {pageCounts &&
                 Array.from({ length: pageCounts }, (_, i) => i + 1).map((num) => (
                   <div
@@ -132,12 +157,30 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
                       renderTextLayer={false}
                       loading={num === 1 ? "Loading Pages..." : ""}
                     />
-                    {step === "checkStep" && num === requesteeDraggableState?.pageNumber && (
+                    {step === "checkStep" &&
+                    docState?.signers.map((signer) => {
+                      const signerDraggableState = draggableStates[signer.email];
+
+                      if (num === signerDraggableState?.pageNumber) {
+                        return (
+                          <DraggableIcon
+                            key={signer.email} 
+                            draggableState={signerDraggableState}
+                            setSign={(e) => setDraggableStateForSigner(signer.email, e)} 
+                            text={`${signer.name}'s Sign`} 
+                            width={97} 
+                          />
+                        );
+                      }
+
+                      return null;
+                    })}
+                    {/* {step === "checkStep" && num === requesteeDraggableState?.pageNumber && (
                       <DraggableIcon draggableState={requesteeDraggableState} setSign={(e) => setRequesteeDraggableState(e)} text="Your Sign" width={97}/>
                     )}
                     {step === "checkStep" && num === nomineeDraggableState?.pageNumber && (
                       <DraggableIcon draggableState={nomineeDraggableState} setSign={(e) => setNomineeDraggableState(e)} text="Nominee Sign" width={120}/>
-                    )}
+                    )} */}
                   </div>
                 ))}
             </>
@@ -151,29 +194,55 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
         />
       </div>
       <div className="w-full pb-[42px] pt-[6px] px-4 flex gap-4 border-t-2 border-buttonContainer">
-        <Button
-          text="Continue"
-          disabled={!requesteeDraggableState && !nomineeDraggableState}
-          isLoading={false}
-          onClick={() => {
-            if (step === "signStep") setStep("checkStep");
-            else if (step === "checkStep") {
-              dispatch.doc.setDoc({
-                pageNumber: requesteeDraggableState?.pageNumber,
-                bottomLeftXCoordinate: requesteeDraggableState?.topLeftXCoordinate,
-                bottomLeftYCoordinate:
-                  requesteeDraggableState!.topLeftYCoordinateFromPageBottomLeftCorner - 24,
-                
-                nomineePageNumber: nomineeDraggableState?.pageNumber,
-                nomineeBottomLeftXCoordinate: nomineeDraggableState?.topLeftXCoordinate,
-                nomineeBottomLeftYCoordinate:
-                  nomineeDraggableState!.topLeftYCoordinateFromPageBottomLeftCorner - 24,
-                
-              });
+      <Button
+        text="Continue"
+        disabled={
+          !docState?.signers.every(
+            (signer) => draggableStates[signer.email] !== undefined
+          )
+        }
+        isLoading={false}
+        onClick={() => {
+          if (step === "signStep") {
+            setStep("checkStep");
+          } else if (step === "checkStep") {
+            // Collect the coordinates for all signers
+            const updatedDocState: SignerPositionState | undefined= docState?.signers.reduce(
+              (acc, signer) => {
+                const signerDraggableState = draggableStates[signer.email];
+                console.log("Signers draggable state: ");
+                console.log(signerDraggableState);
+                if (signerDraggableState) {
+                  signer.bottomLeftXCoordinate = signerDraggableState.topLeftXCoordinate;
+                  signer.bottomLeftYCoordinate = signerDraggableState.topLeftYCoordinateFromPageBottomLeftCorner - 24;
+                  // signer.topRightXCoordinate = ;
+                  // signer.topRightYCoordinate = ;
+                  signer.pageNumber = signerDraggableState.pageNumber;
+                  acc[signer.email] = {
+                    pageNumber: signerDraggableState.pageNumber,
+                    bottomLeftXCoordinate: signerDraggableState.topLeftXCoordinate,
+                    bottomLeftYCoordinate:
+                      signerDraggableState.topLeftYCoordinateFromPageBottomLeftCorner - 24,
+                  };
+                }
+                return acc;
+              },
+              {} as SignerPositionState
+            );
+            
+            console.log("Signers:");
+            console.log(docState?.signers);
+    
+            if (updatedDocState && Object.keys(updatedDocState).length > 0) {
+              console.log(updatedDocState);
+              // dispatch.multidoc.setDoc(updatedDocState);
               f7router.navigate("/addNomineeReview");
+            } else {
+              console.error("No draggable states found for signers.");
             }
-          }}
-        />
+          }
+        }}
+      />
       </div>
       {openModal && (
         <Modal onClose={close} title="Are you sure to delete this?">
@@ -192,8 +261,6 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
               disabled={false}
               isLoading={false}
               onClick={() => {
-                setRequesteeDraggableState(undefined);
-                setNomineeDraggableState(undefined);
                 setStep("signStep");
                 setShowSignIcon(false);
                 setOpenModal(false);
@@ -211,5 +278,6 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
     </MyPage>
   );
 };
+
 
 export default AddNomineeRequestSignature;

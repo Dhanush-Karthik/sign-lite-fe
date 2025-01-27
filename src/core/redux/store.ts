@@ -5,12 +5,14 @@ import screen from "./screen";
 import contact from "./contact";
 import doc from "./doc";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import multidoc from "./multidoc";
 
 export interface RootModel extends Models<RootModel> {
   auth: typeof auth;
   screen: typeof screen;
   contact: typeof contact;
   doc: typeof doc;
+  multidoc: typeof multidoc;
 }
 
 type FullModel = ExtraModelsFromLoading<RootModel>;
@@ -20,6 +22,7 @@ export const models: RootModel = {
   screen,
   contact,
   doc,
+  multidoc
 };
 
 export const store = init<RootModel, FullModel>({

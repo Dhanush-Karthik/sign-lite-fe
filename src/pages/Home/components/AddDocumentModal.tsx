@@ -32,7 +32,7 @@ export const AddDocumentModal = ({ isOpen, close }: AddDocumentModalProps) => {
                   <div className="flex flex-col gap-6 max-w-[223px] mb-7 w-full">
                     <div
                       onClick={() => setType("request")}
-                      className="flex gap-3 justify-between items-center display-none"
+                      className="flex gap-3 justify-between items-center"
                     >
                       <img src={RequestIcon} />
                       <p className="text-white w-full text-base leading-5 font-medium">

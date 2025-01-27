@@ -32,6 +32,7 @@ const useOpenid = () => {
       if (loginUrl.composedUrl) window.location.replace(loginUrl.composedUrl);
     } else {
       const userInfo = await AuthManager.login(code);
+      
       if (userInfo) {
         dispatch.auth.setUser(userInfo);
         localStorage.setItem("token", userInfo.access_token);

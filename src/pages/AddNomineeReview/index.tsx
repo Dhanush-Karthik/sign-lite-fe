@@ -18,6 +18,7 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   // const isContactActive = useAppSelector((state) => state.contact.isActive);
   const loading = useAppSelector((state) => state.loading.models.doc);
   const docState = useAppSelector((state) => state.doc);
+  const multiDocState = useAppSelector((state) => state.multidoc);
   const screen = useAppSelector((state) => state.screen);
   const user = useAppSelector((state) => state.auth.user);
   const { close, open, isOpen } = useDisclosure(); // for listen whether textareas are focused
@@ -35,45 +36,62 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   }, [textAreasValue.emailSubject, textAreasValue.messageToRecipient]);
 
   const sendDoc = async () => {
-    const { ...payload } = docState;
+    const { ...multidocPayload} = multiDocState;
 
-    // Requester part
-    payload.bottomLeftXCoordinate = Math.round(
-      (100 * payload.bottomLeftXCoordinate! - 16) / (screen.safeAreas!.canvasRectWidth!)
-    );
-    payload.bottomLeftYCoordinate = Math.round(
-      (100 * payload.bottomLeftYCoordinate!) / screen.safeAreas!.canvasRectHeight!
-    );
-    payload.topRightXCoordinate = payload.bottomLeftXCoordinate + 20;
-    payload.topRightYCoordinate = payload.bottomLeftYCoordinate + 7;
+    multidocPayload.sender = multidocPayload.signers[0].name;
     
-    // Nominee part
-    payload.nomineeBottomLeftXCoordinate = Math.round(
-      (100 * payload.nomineeBottomLeftXCoordinate! - 16) / (screen.safeAreas!.canvasRectWidth!)
-    );
-    payload.nomineeBottomLeftYCoordinate = Math.round(
-      (100 * payload.nomineeBottomLeftYCoordinate!) / screen.safeAreas!.canvasRectHeight!
-    );
-    payload.nomineeTopRightXCoordinate = payload.nomineeBottomLeftXCoordinate + 20;
-    payload.nomineeTopRightYCoordinate = payload.nomineeBottomLeftYCoordinate + 7;
-
-    const requestBody = {
-      accountNumber: "1234567890",
-      accountHolderName: user?.name,
-      accountHolderUserId: user?.email,
-      nomineeName: `${payload.name}`,
-      nomineeUserId: `${payload.email}`,
-      bottomLeftXCoordinate: payload.bottomLeftXCoordinate,
-      bottomLeftYCoordinate: payload.bottomLeftYCoordinate,
-      topRightXCoordinate: payload.topRightXCoordinate,
-      topRightYCoordinate: payload.topRightYCoordinate,
-      nomineeBottomLeftXCoordinate: payload.nomineeBottomLeftXCoordinate,
-      nomineeBottomLeftYCoordinate: payload.nomineeBottomLeftYCoordinate,
-      nomineeTopRightXCoordinate: payload.nomineeTopRightXCoordinate,
-      nomineeTopRightYCoordinate: payload.nomineeTopRightYCoordinate
+    // Define the output signer type
+    interface OutputSigner {
+      topRightXCoordinate: number;
+      topRightYCoordinate: number;
+    }
+    
+    // Define the output object type
+    interface Output {
+      signers: OutputSigner[];
+    }
+    
+    // Initialize the base output object
+    const reqBody: Output = {
+      signers: [],
     };
+    
+  
+    multidocPayload.signers.forEach((signer) => {
+      const bottomLeftXCoordinate = Math.round(signer.bottomLeftXCoordinate!);
+      const bottomLeftYCoordinate = Math.round(signer.bottomLeftYCoordinate!);
+    
+      const width = 100; 
+      const height = 50;
+      let topRightXCoordinate = 0;
+      let topRightYCoordinate = 0;
 
-    axios.post(`${API_BASE_URL}/api/addNominee`, requestBody)
+      if(bottomLeftXCoordinate && bottomLeftYCoordinate) {
+        topRightXCoordinate = Math.round(bottomLeftXCoordinate + width);
+        topRightYCoordinate = Math.round(bottomLeftYCoordinate + height);
+      }
+    
+      const newSigner: OutputSigner = {
+        ...signer, 
+        topRightXCoordinate,
+        topRightYCoordinate,
+      };
+      
+      reqBody.signers.push(newSigner);
+    });
+
+    const formData = new FormData();
+    formData.append("document", multidocPayload.signatureFile!);
+    await axios.post(`${API_BASE_URL}/api/${multidocPayload.sender}/uploadDocument`, 
+      formData, 
+      {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    axios.post(`${API_BASE_URL}/api/addNominee`, reqBody)
       .then(() => {
         f7router.navigate("/");
         dispatch.doc.setDoc(null);
