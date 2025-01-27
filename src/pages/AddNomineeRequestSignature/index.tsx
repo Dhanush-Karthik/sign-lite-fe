@@ -158,7 +158,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
                             key={signer.email} 
                             draggableState={signerDraggableState}
                             setSign={(e) => setDraggableStateForSigner(signer.email, e)} 
-                            text={`${signer.name}'s Sign`} 
+                            text={`${signer.name}`} 
                             width={97} 
                           />
                         );
