@@ -7,16 +7,14 @@ import CheckIcon from "@/assets/checkIcon.svg";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
 import clsx from "clsx";
-import axios from "axios";
 import { f7 } from "framework7-react";
 import AddNomineeFieldsRecipientReviewStep from "@/components/AddNomineeFieldsRecipientReviewStep";
-import { API_BASE_URL } from "@/constants";
 import SignerInput from "@/components/signerInput";
 
 const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   // const { isOpen, close, open } = useDisclosure();
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isInputFocused] = useState(false);
   const loading = useAppSelector((state) => state.loading.models.contact);
   const dispatch = useAppDispatch();
   const [isValid, setIsValid] = useState(false);
@@ -84,7 +82,7 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
       (signer) =>
         signer.name.trim() !== "" &&
         signer.email.trim() !== "" 
-        // && isValidEmail(signer.email)
+        && isValidEmail(signer.email)
     );
     setIsValid(isFormValid);
   }, [signers]);

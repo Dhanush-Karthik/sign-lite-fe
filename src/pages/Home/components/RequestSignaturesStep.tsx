@@ -7,8 +7,6 @@ import CrossIcon from "@/assets/crossIcon.svg";
 import { useAppDispatch } from "@/core/redux/store";
 import jsPDF from "jspdf"; // Library for creating PDFs
 import { nonceGenerator } from "@/core/utils";
-import axios from "axios";
-import { API_BASE_URL } from "@/constants";
 
 const RequestSignaturesStep = ({
   close,

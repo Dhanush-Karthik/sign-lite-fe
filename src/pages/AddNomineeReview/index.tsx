@@ -19,8 +19,6 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   const loading = useAppSelector((state) => state.loading.models.doc);
   const docState = useAppSelector((state) => state.doc);
   const multiDocState = useAppSelector((state) => state.multidoc);
-  const screen = useAppSelector((state) => state.screen);
-  const user = useAppSelector((state) => state.auth.user);
   const { close, open, isOpen } = useDisclosure(); // for listen whether textareas are focused
   const [textAreasValue, setTextAreasValue] = useState({
     emailSubject:

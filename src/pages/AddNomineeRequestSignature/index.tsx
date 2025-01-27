@@ -21,15 +21,6 @@ export type DraggableStateType =
     }
   | undefined;
 
-type Signer = {
-  name: string;
-  email: string;
-  pageNumber?: number;
-  bottomLeftXCoordinate?: number;
-  bottomLeftYCoordinate?: number;
-  topRightXCoordinate?: number;
-  topRightYCoordinate?: number;
-};
 
 type SignerPositionState = {
   [email: string]: {
