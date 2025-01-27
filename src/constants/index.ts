@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://shiftpen-miniapp.dev.grootan.net";
 const API_PATHS = {
   GET_COMPOSED_URL: "/v1/auth/getComposedUrl",
   LOGIN: "/v1/auth/login-oidc",
