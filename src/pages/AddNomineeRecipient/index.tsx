@@ -2,8 +2,6 @@ import MyPage from "@/components/MyPage";
 import { Router } from "framework7/types";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
-import MeandOther from "@/assets/meandOther.svg";
-import CheckIcon from "@/assets/checkIcon.svg";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
 import clsx from "clsx";
@@ -18,6 +16,8 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   const loading = useAppSelector((state) => state.loading.models.contact);
   const dispatch = useAppDispatch();
   const [isValid, setIsValid] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("BVSign");
+  const [isOpen, setIsOpen] = useState(false);
 
   interface Signer {
     name: string;
@@ -68,13 +68,24 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
 
   const handleSubmit = () => {
     console.log("Signers data:", signers);
-    dispatch.multidoc.setDoc({signers: signers});
+    dispatch.multidoc.setDoc({signatureType: selectedOption, signers: signers});
     f7.views.main.router.navigate("/addNomineeRequestSignature");
   };
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+
+  const options = [
+    { value: "BVSign", label: "BVSign" },
+    { value: "Yousign", label: "Yousign" },
+  ];
+
+  const handleOptionChange = (option: string) => {
+    setSelectedOption(option);
+    setIsOpen(false);
   };
 
   useEffect(() => {
@@ -108,28 +119,61 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
           height: `calc(100vh - 148px - ${safeAreas?.top ?? 0}px)`,
         }}
       >
-        <h2 className="text-primaryTextColor text-xl font-bold px-4">Add Recipients</h2>
+        <h2 className="text-primaryTextColor text-xl font-bold px-4">Add Signers</h2>
         <div
           className={clsx(
             "py-6 px-4 flex-1 flex flex-col gap-6",
             !isInputFocused && "overflow-scroll"
           )}
         >
-          <div>
-            <p className="text-sm font-medium text-primaryTextColor">Select who needs to sign</p>
-            <div className="flex gap-3 items-center mt-4 display-none">
-              <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-[#E4EBFD]">
-                <img className="text-[24px] leading-5 font-bold text-blue" src={MeandOther} />
-              </div>
-              <div className="flex flex-col gap-1 flex-grow ">
-                <p className="text-mainDarkBlue text-sm font-medium">Me and other</p>
-                <p className="text-gray text-xs leading-normal">
-                  Only me and one other recipients selected.
-                </p>
-              </div>
-              <img className="text-[24px] leading-5 font-bold text-blue w-6" src={CheckIcon} />
-            </div>
+          <div className="mt-6">
+      <p className="text-gray-700 text-sm font-medium mb-2">
+        Select signature method
+      </p>
+      <div className="relative">
+        <button
+          className="w-full flex items-center justify-between px-4 py-2 border border-blue-500 rounded-lg text-blue-500 font-medium bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          {selectedOption}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-5 w-5 transform transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+
+        {/* Dropdown Options */}
+        {isOpen && (
+          <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+            {options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleOptionChange(option.value)}
+                className={`w-full text-left px-4 py-2 text-sm font-medium ${
+                  selectedOption === option.value
+                    ? "bg-blue-100 text-blue-500"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
+        )}
+      </div>
+    </div>
           {signers.map((signer, index) => (
             <SignerInput
               key={index}

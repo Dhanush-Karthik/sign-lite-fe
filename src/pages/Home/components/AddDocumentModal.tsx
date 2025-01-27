@@ -44,7 +44,7 @@ export const AddDocumentModal = ({ isOpen, close }: AddDocumentModalProps) => {
                     </div>
                     <div
                       onClick={() => {f7.views.main.router.navigate("/addNominee")}}
-                      className="flex gap-3 justify-between items-center"
+                      className="flex gap-3 justify-between items-center display-none"
                     >
                       <img src={SignIcon} />
                       <p className="text-white w-full text-base leading-5 font-medium">

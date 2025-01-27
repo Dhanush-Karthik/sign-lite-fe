@@ -22,7 +22,7 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   const { close, open, isOpen } = useDisclosure(); // for listen whether textareas are focused
   const [textAreasValue, setTextAreasValue] = useState({
     emailSubject:
-      docState?.emailSubject || `Sign ${docState?.signatureFile?.name} with Sign and List`,
+      docState?.emailSubject || `Sign ${multiDocState?.signatureFile?.name} with Sign and List`,
     messageToRecipient: docState?.messageText || "",
   });
 
@@ -46,11 +46,13 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
     
     // Define the output object type
     interface Output {
+      signatureType: string;
       signers: OutputSigner[];
     }
     
     // Initialize the base output object
     const reqBody: Output = {
+      signatureType: multiDocState?.signatureType!,
       signers: [],
     };
     

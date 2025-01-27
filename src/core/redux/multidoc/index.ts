@@ -12,6 +12,7 @@ type Signer = {
 };
 
 type SendDocState = {
+  signatureType?: string;
   signatureFile?: File;
   callbackUrl?: string;
   messageText?: string;
@@ -21,6 +22,7 @@ type SendDocState = {
 } | null;
 
 const initialState: SendDocState = {
+  signatureType: undefined,
   signatureFile: undefined,
   callbackUrl: undefined,
   messageText: undefined,
