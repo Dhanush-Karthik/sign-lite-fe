@@ -1,8 +1,5 @@
 import { createModel } from "@rematch/core";
 import { RootModel } from "../store";
-import { miniappClient } from "@/core/miniappClient";
-import { API_PATHS } from "@/constants";
-import { DocType } from "@/types";
 
 type Signer = {
   name: string;
