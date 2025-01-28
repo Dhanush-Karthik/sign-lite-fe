@@ -70,7 +70,7 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
       );
 
       let topRightXCoordinate = signer.bottomLeftXCoordinate + 20;
-      let topRightYCoordinate = signer.bottomLeftYCoordinate;
+      let topRightYCoordinate = signer.bottomLeftYCoordinate + 7;
     
       const newSigner: OutputSigner = {
         ...signer, 
