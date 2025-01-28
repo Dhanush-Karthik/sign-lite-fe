@@ -1,7 +1,17 @@
 import Sign from "@/assets/components/Sign";
 import {  useAppDispatch, useAppSelector } from "@/core/redux/store";
-import { DraggableStateType } from "@/pages/RequestSignature";
+// import { DraggableStateType } from "@/pages/RequestSignature";
 import Draggable, { DraggableEventHandler } from "react-draggable";
+
+export type DraggableStateType =
+  | {
+      x : number,
+      y : number,
+      topLeftXCoordinate: number;
+      topLeftYCoordinateFromPageBottomLeftCorner: number;
+      pageNumber: number;
+    }
+  | undefined;
 
 const DraggableIcon = ({
   pageNumber,
@@ -29,12 +39,9 @@ const DraggableIcon = ({
     if (!canvas) return;
 
     const canvasRect = canvas.getBoundingClientRect();
-    console.log("Data: ");
-    console.log(data);
-    console.log("Canvas rect: ");
-    console.log(canvasRect);
-    console.log("Surface area: ");
-    console.log(safeAreas);
+
+    const x = Math.round(data.x * 1.59) - 10;
+    const y = Math.round(data.y * 1.59) - 20;
 
     const topLeftXCoordinate = data.x - 16; // subtract 16 padding, add icon width to react top-right-x-coordinate
     const topLeftYCoordinateFromPageBottomLeftCorner =
@@ -45,6 +52,8 @@ const DraggableIcon = ({
     });
 
     setSign({
+      x,
+      y,
       topLeftXCoordinate,
       topLeftYCoordinateFromPageBottomLeftCorner,
       pageNumber,

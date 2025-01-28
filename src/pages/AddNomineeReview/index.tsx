@@ -15,6 +15,7 @@ import Spinner from "@/components/Spinner";
 
 const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   const dispatch = useAppDispatch();
+  const screen = useAppSelector((state) => state.screen);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   // const isContactActive = useAppSelector((state) => state.contact.isActive);
   const loading = useAppSelector((state) => state.loading.models.doc);
@@ -60,18 +61,16 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
     
   
     multidocPayload.signers.forEach((signer) => {
-      const bottomLeftXCoordinate = Math.round(signer.bottomLeftXCoordinate!);
-      const bottomLeftYCoordinate = Math.round(signer.bottomLeftYCoordinate!);
-    
-      const width = 100; 
-      const height = 50;
-      let topRightXCoordinate = 0;
-      let topRightYCoordinate = 0;
+      signer.bottomLeftXCoordinate = Math.round(
+        (100 * signer.bottomLeftXCoordinate! - 16) / (screen.safeAreas!.canvasRectWidth!)
+      );
 
-      if(bottomLeftXCoordinate && bottomLeftYCoordinate) {
-        topRightXCoordinate = Math.round(bottomLeftXCoordinate + width);
-        topRightYCoordinate = Math.round(bottomLeftYCoordinate + height);
-      }
+      signer.bottomLeftYCoordinate = Math.round(
+        (100 * signer.bottomLeftYCoordinate!) / screen.safeAreas!.canvasRectHeight!
+      );
+
+      let topRightXCoordinate = signer.bottomLeftXCoordinate + 20;
+      let topRightYCoordinate = signer.bottomLeftYCoordinate;
     
       const newSigner: OutputSigner = {
         ...signer, 

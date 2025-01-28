@@ -15,6 +15,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pd
 
 export type DraggableStateType =
   | {
+      x : number,
+      y : number,
       topLeftXCoordinate: number;
       topLeftYCoordinateFromPageBottomLeftCorner: number;
       pageNumber: number;
@@ -28,6 +30,8 @@ const RequestSignature = ({ f7router }: { f7router: Router.Router }) => {
   const coordinates: DraggableStateType =
     docState?.pageNumber && docState.bottomLeftXCoordinate && docState.bottomLeftYCoordinate
       ? {
+          x: 0,
+          y: 0,
           pageNumber: docState.pageNumber,
           topLeftXCoordinate: docState.bottomLeftXCoordinate,
           topLeftYCoordinateFromPageBottomLeftCorner: docState.bottomLeftYCoordinate + 24,

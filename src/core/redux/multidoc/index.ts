@@ -5,6 +5,8 @@ type Signer = {
   name: string;
   email: string;
   pageNumber?: number;
+  originX?: number;
+  originY?: number;
   bottomLeftXCoordinate?: number;
   bottomLeftYCoordinate?: number;
   topRightXCoordinate?: number;
@@ -33,6 +35,8 @@ const initialState: SendDocState = {
       name: "",
       email: "",
       pageNumber: undefined,
+      originX: undefined,
+      originY: undefined,
       bottomLeftXCoordinate: undefined,
       bottomLeftYCoordinate: undefined,
       topRightXCoordinate: undefined,

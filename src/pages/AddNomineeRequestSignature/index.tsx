@@ -15,6 +15,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pd
 
 export type DraggableStateType =
   | {
+      x : number,
+      y : number,
       topLeftXCoordinate: number;
       topLeftYCoordinateFromPageBottomLeftCorner: number;
       pageNumber: number;
@@ -61,15 +63,18 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
       const initialStates = docState.signers.reduce((acc, signer) => {
         console.log(signer);
         if (
+          draggableStates[signer.email]?.x &&
+          draggableStates[signer.email]?.y &&
           signer.pageNumber &&
           signer.bottomLeftXCoordinate &&
           signer.bottomLeftYCoordinate
         ) {
           acc[signer.email] = {
+            x: draggableStates[signer.email]?.x!,
+            y: draggableStates[signer.email]?.y!,
             pageNumber: signer.pageNumber,
             topLeftXCoordinate: signer.bottomLeftXCoordinate,
-            topLeftYCoordinateFromPageBottomLeftCorner:
-              signer.bottomLeftYCoordinate + 24,
+            topLeftYCoordinateFromPageBottomLeftCorner: signer.bottomLeftYCoordinate + 24,
           };
         } else {
           acc[signer.email] = undefined;
@@ -204,10 +209,10 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
                 console.log("Signers draggable state: ");
                 console.log(signerDraggableState);
                 if (signerDraggableState) {
+                  signer.originX =  signerDraggableState.x,
+                  signer.originY = signerDraggableState.y,
                   signer.bottomLeftXCoordinate = signerDraggableState.topLeftXCoordinate;
                   signer.bottomLeftYCoordinate = signerDraggableState.topLeftYCoordinateFromPageBottomLeftCorner - 24;
-                  // signer.topRightXCoordinate = ;
-                  // signer.topRightYCoordinate = ;
                   signer.pageNumber = signerDraggableState.pageNumber;
                   acc[signer.email] = {
                     pageNumber: signerDraggableState.pageNumber,
