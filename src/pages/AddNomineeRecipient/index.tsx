@@ -128,7 +128,7 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
         >
           <div className="mt-6">
       <p className="text-gray-700 text-sm font-medium mb-2">
-        Select signature method
+        Select a signature provider
       </p>
       <div className="relative">
         <button
