@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 const Spinner = ({ isFull = true }: { isFull?: boolean }) => {
   return (
-    <div className={clsx(isFull && "w-full h-screen flex justify-center items-center")}>
+    <div className={clsx(isFull ? "w-full h-screen flex justify-center items-center": "fixed inset-0 flex justify-center items-center bg-black bg-opacity-30 z-50")}>
       <div className={"w-7 h-7 flex justify-center items-center spinner"}>
         <svg
           className="inline w-7 h-7 animate-spin text-[#1D19FF]"

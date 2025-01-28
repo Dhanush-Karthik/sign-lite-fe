@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AddNomineeFieldsRecipientReviewStep from "@/components/AddNomineeFieldsRecipientReviewStep";
 import { API_BASE_URL } from "@/constants";
+import Spinner from "@/components/Spinner";
 
 const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   const dispatch = useAppDispatch();
@@ -19,6 +20,7 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   const loading = useAppSelector((state) => state.loading.models.doc);
   const docState = useAppSelector((state) => state.doc);
   const multiDocState = useAppSelector((state) => state.multidoc);
+  const [isLoading, setIsLoading] = useState(false);
   const { close, open, isOpen } = useDisclosure(); // for listen whether textareas are focused
   const [textAreasValue, setTextAreasValue] = useState({
     emailSubject:
@@ -80,37 +82,48 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
       reqBody.signers.push(newSigner);
     });
 
-    const formData = new FormData();
-    formData.append("document", multidocPayload.signatureFile!);
-    await axios.post(`${API_BASE_URL}/api/${multidocPayload.sender}/uploadDocument`, 
-      formData, 
-      {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    try {
+      setIsLoading(true);
 
-    axios.post(`${API_BASE_URL}/api/addNominee`, reqBody)
-      .then(() => {
-        f7router.navigate("/");
-        dispatch.doc.setDoc(null);
-        dispatch.contact.setContactActivity(null);
-      })
-      .catch(error => {
-        if (error.response) {
-          console.error('Error Status:', error.response.status);
-          console.error('Error Data:', error.response.data);
-        } else if (error.request) {
-          console.error('No Response Received:', error.request);
-        } else {
-          console.error('Error Message:', error.message);
+      const formData = new FormData();
+      formData.append("document", multidocPayload.signatureFile!);
+      await axios.post(`${API_BASE_URL}/api/${multidocPayload.sender}/uploadDocument`, 
+        formData, 
+        {
+          headers: {
+              "Content-Type": "multipart/form-data",
+          },
         }
-      });
-    };
+      );
+
+      await axios.post(`${API_BASE_URL}/api/addNominee`, reqBody)
+        .then(() => {
+          f7router.navigate("/");
+          dispatch.doc.setDoc(null);
+          dispatch.contact.setContactActivity(null);
+        })
+        .catch((error) => {
+          if (error.response) {
+            console.error('Error Status:', error.response.status);
+            console.error('Error Data:', error.response.data);
+          } else if (error.request) {
+            console.error('No Response Received:', error.request);
+          } else {
+            console.error('Error Message:', error.message);
+          }
+        })
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <MyPage name="Review">
+      {isLoading && 
+        <div className="">
+          <Spinner isFull={false} />
+        </div>
+      }
       <Header
         title="Request Signature"
         back={() => {
