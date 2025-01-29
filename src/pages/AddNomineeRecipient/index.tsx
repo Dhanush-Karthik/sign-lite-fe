@@ -88,6 +88,7 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
     setIsOpen(false);
   };
 
+
   useEffect(() => {
     const isFormValid = signers.length>0 && signers.every(
       (signer) =>
@@ -119,10 +120,17 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
           height: `calc(100vh - 148px - ${safeAreas?.top ?? 0}px)`,
         }}
       >
-        <h2 className="text-primaryTextColor text-xl font-bold px-4">Add Signers</h2>
+        <div className="pr-4 flex justify-between">
+          <div className="flex justify-center items-center">
+            <h2 className="text-primaryTextColor text-xl font-bold px-4">Add Signers</h2>
+          </div>
+          <div onClick={handleAddSigner} className="bg-[#1D56EE] rounded-full w-9 h-9 pb-1 flex items-center justify-center">
+              <p className="text-3xl text-white">+</p>
+          </div> 
+        </div>
         <div
           className={clsx(
-            "py-6 px-4 flex-1 flex flex-col gap-6",
+            "pt-2 pb-6 px-4 flex-1 flex flex-col gap-6",
             !isInputFocused && "overflow-scroll"
           )}
         >
@@ -183,14 +191,6 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
               handleRemoveSigner={handleRemoveSigner}
             />
           ))}
-        </div>
-        <div className="flex items-center justify-center w-full p-[24px] bg-white">
-          <Button
-            text="Add Signer"
-            disabled={false}
-            isLoading={loading}
-            onClick={handleAddSigner}
-          />
         </div>
         <div className="w-full pt-[6px] pb-[42px] px-4 flex gap-4 border-t-2 bg-main border-buttonContainer">
           <Button
