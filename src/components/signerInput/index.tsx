@@ -24,7 +24,7 @@ const SignerInput: React.FC<SignerInputProps> = ({ index, signer, handleInputCha
         type="text"
         placeholder="Enter recipient name"
         value={signer.name}
-        onChange={(e) => handleInputChange(index, "name", e.target.value)}
+        onChange={(e) => handleInputChange(index, "name", e.target.value.trim())}
       />
       <Input
         label="Email address"
