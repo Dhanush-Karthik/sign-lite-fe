@@ -113,20 +113,70 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
       <section
         title="content"
         className={clsx(
-          "bg-white rounded-t-[20px] pt-6 flex flex-col",
+          "bg-white rounded-t-[20px] pt-5 flex flex-col",
           isInputFocused && "overflow-scroll"
         )}
         style={{
           height: `calc(100vh - 148px - ${safeAreas?.top ?? 0}px)`,
         }}
       >
-        <div className="pr-4 flex justify-between">
-          <div className="flex justify-center items-center">
-            <h2 className="text-primaryTextColor text-xl font-bold px-4">Add Signers</h2>
+        <div className="pr-4 mb-4 flex justify-between">
+          <div className="flex">
+            <div className="flex justify-center items-center">
+              <h2 className="text-primaryTextColor text-xl font-bold px-4">Add Signers</h2>
+            </div>
+            <div className="flex justify-center items-center">
+              <div onClick={handleAddSigner} className="bg-[#1D56EE] rounded-full w-6 h-6 flex items-center justify-center">
+                  <p className="text-2xl text-white pb-[2px]">+</p>
+                  {/* <img width={"20px"} height={"20px"} src={PlusIcon} /> */}
+              </div>
+            </div> 
           </div>
-          <div onClick={handleAddSigner} className="bg-[#1D56EE] rounded-full w-9 h-9 pb-1 flex items-center justify-center">
-              <p className="text-3xl text-white">+</p>
-          </div> 
+          <div className="flex justify-center items-center">
+            <div className="relative">
+              <button
+                className="w-full flex items-center justify-between px-4 py-2 border border-blue-500 rounded-lg text-blue-500 font-medium bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                onClick={() => setIsOpen((prev) => !prev)}
+              >
+                {selectedOption}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-5 w-5 transform transition-transform ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {/* Dropdown Options */}
+              {isOpen && (
+                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+                  {options.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleOptionChange(option.value)}
+                      className={`w-full text-left px-4 py-2 text-sm font-medium ${
+                        selectedOption === option.value
+                          ? "bg-blue-100 text-blue-500"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         <div
           className={clsx(
@@ -134,54 +184,6 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
             !isInputFocused && "overflow-scroll"
           )}
         >
-          <div className="mt-6">
-      <p className="text-gray-700 text-sm font-medium mb-2">
-        Select a signature provider
-      </p>
-      <div className="relative">
-        <button
-          className="w-full flex items-center justify-between px-4 py-2 border border-blue-500 rounded-lg text-blue-500 font-medium bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          onClick={() => setIsOpen((prev) => !prev)}
-        >
-          {selectedOption}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 transform transition-transform ${
-              isOpen ? "rotate-180" : ""
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
-
-        {/* Dropdown Options */}
-        {isOpen && (
-          <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-            {options.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => handleOptionChange(option.value)}
-                className={`w-full text-left px-4 py-2 text-sm font-medium ${
-                  selectedOption === option.value
-                    ? "bg-blue-100 text-blue-500"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
           {signers.map((signer, index) => (
             <SignerInput
               key={index}
@@ -192,7 +194,7 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
             />
           ))}
         </div>
-        <div className="w-full pt-[6px] pb-[42px] px-4 flex gap-4 border-t-2 bg-main border-buttonContainer">
+        <div className="w-full pt-[6px] pb-[2px] px-4 flex gap-4 border-t-2 bg-main border-buttonContainer">
           <Button
             text="Previous"
             disabled={loading}

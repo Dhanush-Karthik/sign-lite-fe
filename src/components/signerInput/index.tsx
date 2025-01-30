@@ -12,19 +12,25 @@ const SignerInput: React.FC<SignerInputProps> = ({ index, signer, handleInputCha
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-full flex justify-between pr-3">
+      <div className="w-full flex justify-between">
         <p className="text-sm font-medium text-primaryTextColor">Signer {index + 1}</p>
-        <button
+        <div className="flex justify-center items-center">
+          <div onClick={() => handleRemoveSigner(index)} className="bg-[#63788E] rounded-full w-6 h-6 flex items-center justify-center">
+              <p className="text-xl text-white pb-[1px]">-</p>
+              {/* <img width={"12px"} height={"10px"} src={DustBin} /> */}
+          </div>
+        </div> 
+        {/* <button
           className="text-red-500"
           onClick={() => handleRemoveSigner(index)}
-        >X</button>
+        >X</button> */}
       </div>
       <Input
         label="Name"
         type="text"
         placeholder="Enter recipient name"
         value={signer.name}
-        onChange={(e) => handleInputChange(index, "name", e.target.value.trim())}
+        onChange={(e) => handleInputChange(index, "name", e.target.value)}
       />
       <Input
         label="Email address"

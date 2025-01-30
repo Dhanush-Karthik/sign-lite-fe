@@ -7,7 +7,7 @@ import clsx from "clsx";
 
 const AddNomineeFieldsRecipientReviewStep = ({ step }: { step: "recipient" |  "review" }) => {
   return (
-    <div className="my-5 mx-auto relative flex gap-7 w-min">
+    <div className="my-3 mx-auto relative flex gap-7 w-min">
       <div className="flex flex-col gap-2 w-[60px] justify-center items-center">
       <RecipientStep2 />
         <p className="text-primaryTextColor text-xs leading-3 opacity-80">Recipient</p>

@@ -25,8 +25,8 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   const { close, open, isOpen } = useDisclosure(); // for listen whether textareas are focused
   const [textAreasValue, setTextAreasValue] = useState({
     emailSubject:
-      docState?.emailSubject || `Sign ${multiDocState?.signatureFile?.name} with Sign and List`,
-    messageToRecipient: docState?.messageText || "",
+      docState?.emailSubject || `Sign ${multiDocState?.signatureFile?.name} with Secure chat`,
+    messageToRecipient: docState?.messageText || "Please sign the document",
   });
 
   useEffect(() => {
