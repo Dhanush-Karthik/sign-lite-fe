@@ -15,6 +15,7 @@ import Spinner from "@/components/Spinner";
 
 const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
   const screen = useAppSelector((state) => state.screen);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   // const isContactActive = useAppSelector((state) => state.contact.isActive);
@@ -95,7 +96,11 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
         }
       );
 
-      await axios.post(`${API_BASE_URL}/api/addNominee`, reqBody)
+      await axios.post(`${API_BASE_URL}/api/addNominee`, reqBody, {
+        headers: {
+          "Authorization": `Bearer ${user?.access_token}`
+        }
+      })
         .then(() => {
           f7router.navigate("/");
           dispatch.doc.setDoc(null);
@@ -126,7 +131,7 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
       <Header
         title="Request Signature"
         back={() => {
-          f7router.back("/", { force: true });
+          f7router.back("/addNomineeRequestSignature", { force: true });
           dispatch.doc.setDoc(null);
           dispatch.contact.setContactActivity(null);
         }}

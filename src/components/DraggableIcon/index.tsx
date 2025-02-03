@@ -18,7 +18,6 @@ const DraggableIcon = ({
   setSign,
   draggableState,
   text,
-  width
 }: {
   pageNumber?: number;
   setSign?: (e: DraggableStateType) => void;
@@ -86,7 +85,7 @@ const DraggableIcon = ({
       }}
     >
       <div className="handle" style={{ touchAction: "none" }}>
-        <Sign text={text} width={width}/>
+        <Sign text={text}/>
       </div>
     </Draggable>
   );

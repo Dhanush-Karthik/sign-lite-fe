@@ -18,6 +18,8 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   const [isValid, setIsValid] = useState(false);
   const [selectedOption, setSelectedOption] = useState("BVSign");
   const [isOpen, setIsOpen] = useState(false);
+  const [isSignersChanged, setIsSignerChanged] = useState(false);
+  const docState = useAppSelector((state) => state.multidoc);
 
   interface Signer {
     name: string;
@@ -42,6 +44,7 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   ]);
 
   const handleAddSigner = () => {
+    setIsSignerChanged(true);
     setSigners([...signers, {
       name: "",
       email: "",
@@ -54,12 +57,12 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   };
 
   const handleRemoveSigner = (index: number) => {
+    setIsSignerChanged(true);
     const updatedSigners = signers.filter((_, i) => i !== index);
     setSigners(updatedSigners);
   };
 
   const handleInputChange = (index: number, field: string, value: string) => {
-    console.log(signers);
     const updatedSigners = signers.map((signer, i) =>
       i === index ? { ...signer, [field]: value } : signer
     );
@@ -90,6 +93,15 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
 
 
   useEffect(() => {
+    const prevSigners: Signer[] = docState?.signers!;
+
+    const isSigners = prevSigners.length > 0 && prevSigners.every(
+      signer => Boolean(signer.name?.trim()) && Boolean(signer.email?.trim())
+    );
+    console.log(isSigners);
+
+    !isSignersChanged && isSigners && setSigners(prevSigners);
+
     const isFormValid = signers.length>0 && signers.every(
       (signer) =>
         signer.name.trim() !== "" &&

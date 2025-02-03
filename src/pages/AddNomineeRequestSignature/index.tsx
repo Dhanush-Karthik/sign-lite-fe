@@ -116,7 +116,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
       <Header
         title="Request Signature"
         back={() => {
-          f7router.back("/", { force: true });
+          f7router.back("/addNominee", { force: true });
           dispatch.doc.setDoc(null);
           dispatch.contact.setContactActivity(null);
         }}
@@ -135,7 +135,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
             <>
               {
                 step === "signStep" && showSignIcon && docState?.signers.map((signer) => {
-                  return <DraggableIcon pageNumber={visiblePage} setSign={(e) => setDraggableStateForSigner(signer.email, e)} text={signer.name} width={97}/>
+                  return <DraggableIcon pageNumber={visiblePage} setSign={(e) => setDraggableStateForSigner(signer.email, e)} text={signer.name}/>
                 })
               }
               
@@ -164,19 +164,12 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
                             draggableState={signerDraggableState}
                             setSign={(e) => setDraggableStateForSigner(signer.email, e)} 
                             text={`${signer.name}`} 
-                            width={97} 
                           />
                         );
                       }
 
                       return null;
                     })}
-                    {/* {step === "checkStep" && num === requesteeDraggableState?.pageNumber && (
-                      <DraggableIcon draggableState={requesteeDraggableState} setSign={(e) => setRequesteeDraggableState(e)} text="Your Sign" width={97}/>
-                    )}
-                    {step === "checkStep" && num === nomineeDraggableState?.pageNumber && (
-                      <DraggableIcon draggableState={nomineeDraggableState} setSign={(e) => setNomineeDraggableState(e)} text="Nominee Sign" width={120}/>
-                    )} */}
                   </div>
                 ))}
             </>
