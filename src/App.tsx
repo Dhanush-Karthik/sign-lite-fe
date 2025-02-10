@@ -36,24 +36,29 @@ const routes = [
   { path: "/details/viewdoc", component: ViewDoc },
 ];
 
-function App() {
-  // const [isReady] = useOpenid();
+function MainApp() {
+  const [isReady] = useOpenid(); // This will only run when MainApp is rendered
+
   const f7params: Framework7Parameters = {
-    name: "Sign & List", // App name
-    routes, // App routes
+    name: "Sign & List",
+    routes,
     url: CALLBACK_URL,
   };
 
+  return isReady ? (
+    <MyApp {...f7params}>
+      <View main transition="f7-parallax" />
+    </MyApp>
+  ) : (
+    <Spinner />
+  );
+}
+
+function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={useOpenid()[0] ? (
-          <MyApp {...f7params}>
-            <View main transition="f7-parallax" />
-          </MyApp>
-        ) : (
-          <Spinner />
-        )} />
+        <Route path="/*" element={<MainApp />} />
         <Route path="/nect/simulation" element={<NectSimulation />} />
       </Routes>
     </BrowserRouter>
