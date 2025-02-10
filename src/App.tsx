@@ -12,6 +12,8 @@ import { ViewDoc } from "./pages/ViewDoc";
 import AddNomineeRecipient from "./pages/AddNomineeRecipient";
 import AddNomineeReview from "./pages/AddNomineeReview";
 import AddNomineeRequestSignature from "./pages/AddNomineeRequestSignature";
+import NectSimulation from "./pages/NectSimulation/NectSimulation";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 const routes = [
   {
@@ -43,15 +45,18 @@ function App() {
   };
 
   return (
-    <>
-      {isReady ? (
-        <MyApp {...f7params}>
-          <View main transition="f7-parallax" />
-        </MyApp>
-      ) : (
-        <Spinner />
-      )}
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={isReady ? (
+            <MyApp {...f7params}>
+              <View main transition="f7-parallax" />
+            </MyApp>
+          ) : (
+            <Spinner />
+          )} />
+        <Route path="/nect/simulation" element={<NectSimulation />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
