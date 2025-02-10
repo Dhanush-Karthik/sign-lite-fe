@@ -21,6 +21,7 @@ const NectSimulation: React.FC = () => {
   };
 
   const handleSimulateFailure = () => {
+    const code = queryParams["code"];
     axios.get(`https://shiftpen.dev.grootan.net/api/v1/nect/callback?code=${code}&state=failure`)
       .then(() => {
         setState("failure");
