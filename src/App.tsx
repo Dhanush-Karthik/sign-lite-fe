@@ -37,7 +37,7 @@ const routes = [
 ];
 
 function App() {
-  const [isReady] = useOpenid();
+  // const [isReady] = useOpenid();
   const f7params: Framework7Parameters = {
     name: "Sign & List", // App name
     routes, // App routes
@@ -47,13 +47,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={isReady ? (
-            <MyApp {...f7params}>
-              <View main transition="f7-parallax" />
-            </MyApp>
-          ) : (
-            <Spinner />
-          )} />
+        <Route path="/" element={useOpenid()[0] ? (
+          <MyApp {...f7params}>
+            <View main transition="f7-parallax" />
+          </MyApp>
+        ) : (
+          <Spinner />
+        )} />
         <Route path="/nect/simulation" element={<NectSimulation />} />
       </Routes>
     </BrowserRouter>
