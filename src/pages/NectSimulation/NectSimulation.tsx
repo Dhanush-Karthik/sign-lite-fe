@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import {useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Check, X } from "lucide-react";
 
 const NectSimulation: React.FC = () => {
+  const [state, setState] = useState("");
   const [searchParams] = useSearchParams();
 
   const queryParams = Object.fromEntries(searchParams.entries());
@@ -12,7 +13,7 @@ const NectSimulation: React.FC = () => {
     const code = queryParams["code"];
     axios.get(`https://shiftpen.dev.grootan.net/api/v1/nect/callback?code=${code}`)
       .then(() => {
-        window.close();
+        setState("success");
       })
       .catch(error => {
         if (error.response) {
@@ -27,12 +28,14 @@ const NectSimulation: React.FC = () => {
   };
 
   const handleSimulateFailure = () => {
+    setState("failure");
     window.close();
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-indigo-900 to-purple-700 px-6 text-center">
-      <div className="max-w-md w-full">
+      {state === "" &&  
+        (<div className="max-w-md w-full">
         <h1 className="text-white text-2xl font-semibold">
           Sandbox identity verification
         </h1>
@@ -50,7 +53,7 @@ const NectSimulation: React.FC = () => {
             <Check className="w-5 h-5 mr-2" />
             Simulate success
           </button>
-          <p className="text-xs text-green-200">Signer identity verified</p>
+          {/* <p className="text-xs text-green-200">Signer identity verified</p> */}
 
           <button
             onClick={handleSimulateFailure}
@@ -59,9 +62,27 @@ const NectSimulation: React.FC = () => {
             <X className="w-5 h-5 mr-2" />
             Simulate failure
           </button>
-          <p className="text-xs text-gray-300">Signer identity cannot be verified</p>
+          {/* <p className="text-xs text-gray-300">Signer identity cannot be verified</p> */}
         </div>
-      </div>
+      </div>)}
+      {state === "success" &&  
+        (<div className="max-w-md w-full">
+        <h1 className="text-white text-2xl font-semibold">
+          Simulation success
+        </h1>
+        <p className="text-white mt-4 text-sm">
+          Identification is verified successfully<br/>You can close this window and enter the OTP triggered to your registered mobile number
+        </p>
+      </div>)}
+      {state === "failure" &&  
+        (<div className="max-w-md w-full">
+        <h1 className="text-white text-2xl font-semibold">
+          Simulation failure
+        </h1>
+        <p className="text-white mt-4 text-sm">
+          Identification verification failed. You can close this window and please resign the document to continue further.
+        </p>
+      </div>)}
     </div>
   );
 };
