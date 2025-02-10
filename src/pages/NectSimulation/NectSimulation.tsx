@@ -16,20 +16,18 @@ const NectSimulation: React.FC = () => {
         setState("success");
       })
       .catch(error => {
-        if (error.response) {
-          console.error('Error Status:', error.response.status);
-          console.error('Error Data:', error.response.data);
-        } else if (error.request) {
-          console.error('No Response Received:', error.request);
-        } else {
           console.error('Error Message:', error.message);
-        }
       });
   };
 
   const handleSimulateFailure = () => {
-    setState("failure");
-    window.close();
+    axios.get(`https://shiftpen.dev.grootan.net/api/v1/nect/callback?code=${code}&state=failure`)
+      .then(() => {
+        setState("failure");
+      })
+      .catch(error => {
+          console.error('Error Message:', error.message);
+      });
   };
 
   return (
