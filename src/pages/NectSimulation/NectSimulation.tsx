@@ -72,6 +72,14 @@ const NectSimulation: React.FC = () => {
         <p className="text-white mt-4 text-sm">
           Identification is verified successfully<br/>You can close this window and enter the OTP triggered to your registered mobile number
         </p>
+        <div className="mt-6 space-y-4">
+          <button
+            onClick={()=> window.close()}
+            className="flex items-center justify-center w-full py-3 rounded-full bg-green-300 text-black font-semibold text-lg shadow-md hover:bg-green-400 transition"
+          >
+            Close window
+          </button>
+        </div>
       </div>)}
       {state === "failure" &&  
         (<div className="max-w-md w-full">
@@ -81,6 +89,14 @@ const NectSimulation: React.FC = () => {
         <p className="text-white mt-4 text-sm">
           Identification verification failed. You can close this window and please resign the document to continue further.
         </p>
+        <div className="mt-6 space-y-4">
+          <button
+            onClick={()=> window.close()}
+            className="flex items-center justify-center w-full py-3 rounded-full bg-green-300 text-black font-semibold text-lg shadow-md hover:bg-green-400 transition"
+          >
+            Close window
+          </button>
+        </div>
       </div>)}
     </div>
   );
