@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
 import clsx from "clsx";
 import { f7 } from "framework7-react";
-import AddNomineeFieldsRecipientReviewStep from "@/components/AddNomineeFieldsRecipientReviewStep";
+// import AddNomineeFieldsRecipientReviewStep from "@/components/AddNomineeFieldsRecipientReviewStep";
 import SignerInput from "@/components/signerInput";
 
 const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
@@ -16,8 +16,8 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   const loading = useAppSelector((state) => state.loading.models.contact);
   const dispatch = useAppDispatch();
   const [isValid, setIsValid] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("BVSign");
-  const [isOpen, setIsOpen] = useState(false);
+  // const [selectedOption, setSelectedOption] = useState("BVSign");
+  // const [isOpen, setIsOpen] = useState(false);
   const [isSignersChanged, setIsSignerChanged] = useState(false);
   const docState = useAppSelector((state) => state.multidoc);
 
@@ -70,8 +70,7 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   };
 
   const handleSubmit = () => {
-    console.log("Signers data:", signers);
-    dispatch.multidoc.setDoc({signatureType: selectedOption, signers: signers});
+    dispatch.multidoc.setDoc({signatureType: "BVSign", signers: signers});
     f7.views.main.router.navigate("/addNomineeRequestSignature");
   };
 
@@ -81,15 +80,15 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
   };
 
 
-  const options = [
-    { value: "BVSign", label: "BVSign" },
-    { value: "Yousign", label: "Yousign" },
-  ];
+  // const options = [
+  //   { value: "BVSign", label: "BVSign" },
+  //   { value: "Yousign", label: "Yousign" },
+  // ];
 
-  const handleOptionChange = (option: string) => {
-    setSelectedOption(option);
-    setIsOpen(false);
-  };
+  // const handleOptionChange = (option: string) => {
+  //   setSelectedOption(option);
+  //   setIsOpen(false);
+  // };
 
 
   useEffect(() => {
@@ -98,7 +97,6 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
     const isSigners = prevSigners.length > 0 && prevSigners.every(
       signer => Boolean(signer.name?.trim()) && Boolean(signer.email?.trim())
     );
-    console.log(isSigners);
 
     !isSignersChanged && isSigners && setSigners(prevSigners);
 
@@ -121,30 +119,29 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
           dispatch.contact.setContactActivity(null);
         }}
       />
-      <AddNomineeFieldsRecipientReviewStep step="recipient" />
+      {/* <AddNomineeFieldsRecipientReviewStep step="recipient" /> */}
       <section
         title="content"
         className={clsx(
-          "bg-white rounded-t-[20px] pt-5 flex flex-col",
+          "bg-white rounded-t-[20px] flex flex-col",
           isInputFocused && "overflow-scroll"
         )}
         style={{
-          height: `calc(100vh - 148px - ${safeAreas?.top ?? 0}px)`,
+          height: `calc(100vh - 95px - ${safeAreas?.top ?? 0}px)`,
         }}
       >
-        <div className="pr-4 mb-4 flex justify-between">
-          <div className="flex">
-            <div className="flex justify-center items-center">
+        <div className="my-5 flex justify-between items-center">
+            <div className="flex flex-col">
               <h2 className="text-primaryTextColor text-xl font-bold px-4">Add Signers</h2>
+              <p className="px-4 text-xs">Add one or more signers to the request</p>
             </div>
-            <div className="flex justify-center items-center">
-              <div onClick={handleAddSigner} className="bg-[#1D56EE] rounded-full w-6 h-6 flex items-center justify-center">
+            <div className="flex justify-center items-center mr-4">
+              <div onClick={handleAddSigner} className="bg-[#1D56EE] rounded-full w-9 h-9 flex items-center justify-center">
                   <p className="text-2xl text-white pb-[2px]">+</p>
                   {/* <img width={"20px"} height={"20px"} src={PlusIcon} /> */}
               </div>
-            </div> 
-          </div>
-          <div className="flex justify-center items-center">
+            </div>
+          {/* <div className="flex justify-center items-center">
             <div className="relative">
               <button
                 className="w-full flex items-center justify-between px-4 py-2 border border-blue-500 rounded-lg text-blue-500 font-medium bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -169,7 +166,6 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
                 </svg>
               </button>
 
-              {/* Dropdown Options */}
               {isOpen && (
                 <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
                   {options.map((option) => (
@@ -188,7 +184,7 @@ const AddNomineeRecipient = ({ f7router }: { f7router: Router.Router }) => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
         <div
           className={clsx(

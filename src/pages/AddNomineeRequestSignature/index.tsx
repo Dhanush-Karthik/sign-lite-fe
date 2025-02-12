@@ -9,7 +9,11 @@ import { useEffect, useRef, useState } from "react";
 import { Document, pdfjs, Page as PdfPage } from "react-pdf";
 import EditBox from "./components/EditBox";
 import { Modal } from "@/components/Modal";
+import axios from "axios";
+import { API_BASE_URL } from "@/constants";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
+import Spinner from "@/components/Spinner";
+
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -32,11 +36,24 @@ type SignerPositionState = {
   };
 };
 
+interface OutputSigner {
+  topRightXCoordinate: number;
+  topRightYCoordinate: number;
+}
+
+interface Output {
+  signatureType: string;
+  signers: OutputSigner[];
+}
+
 const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) => {
   const [pageCounts, setPageCounts] = useState();
   const requesteeDocState = useAppSelector((state) => state.multidoc); // One more left
   const docState = useAppSelector((state) => state.multidoc);
   const dispatch = useAppDispatch();
+  const screen = useAppSelector((state) => state.screen);
+  const [isLoading, setIsLoading] = useState(false);
+  const user = useAppSelector((state) => state.auth.user);
 
   const [visiblePage, setVisiblePage] = useState<number>();
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -50,18 +67,118 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
   const [draggableStates, setDraggableStates] = useState<Record<string, DraggableStateType>>({});
 
   const setDraggableStateForSigner = (signerId: string, newState: DraggableStateType) => {
-    console.log(newState);
     setDraggableStates((prevStates) => ({
       ...prevStates,
       [signerId]: newState,
     }));
   };
 
+  const handleContinue = async () => {
+    if (step === "signStep") {
+      setStep("checkStep");
+    } else if (step === "checkStep") {
+      // Collect the coordinates for all signers
+      const updatedDocState: SignerPositionState | undefined= docState?.signers.reduce(
+        (acc, signer) => {
+          const signerDraggableState = draggableStates[signer.email];
+          if (signerDraggableState) {
+            signer.originX =  signerDraggableState.x,
+            signer.originY = signerDraggableState.y,
+            signer.bottomLeftXCoordinate = signerDraggableState.topLeftXCoordinate;
+            signer.bottomLeftYCoordinate = signerDraggableState.topLeftYCoordinateFromPageBottomLeftCorner - 24;
+            signer.pageNumber = signerDraggableState.pageNumber;
+            acc[signer.email] = {
+              pageNumber: signerDraggableState.pageNumber,
+              bottomLeftXCoordinate: signerDraggableState.topLeftXCoordinate,
+              bottomLeftYCoordinate:
+                signerDraggableState.topLeftYCoordinateFromPageBottomLeftCorner - 24,
+            };
+          }
+          return acc;
+        },
+        {} as SignerPositionState
+      );
+      
+      const reqBody: Output = {
+        signatureType: docState?.signatureType!,
+        signers: [],
+      };
+
+      const { ...multidocPayload} = docState;
+
+      multidocPayload.sender = multidocPayload.signers[0].name;  
+    
+      multidocPayload.signers.forEach((signer) => {
+        signer.bottomLeftXCoordinate = Math.round(
+          (100 * signer.bottomLeftXCoordinate! - 16) / (screen.safeAreas!.canvasRectWidth!)
+        );
+
+        signer.bottomLeftYCoordinate = Math.round(
+          (100 * signer.bottomLeftYCoordinate!) / screen.safeAreas!.canvasRectHeight!
+        );
+
+        let topRightXCoordinate = signer.bottomLeftXCoordinate + 20;
+        let topRightYCoordinate = signer.bottomLeftYCoordinate + 7;
+      
+        const newSigner: OutputSigner = {
+          ...signer, 
+          topRightXCoordinate,
+          topRightYCoordinate,
+        };
+        
+        reqBody.signers.push(newSigner);
+      });
+
+      try {
+        setIsLoading(true);
+
+        const formData = new FormData();
+        formData.append("document", multidocPayload.signatureFile!);
+        await axios.post(`${API_BASE_URL}/api/${multidocPayload.sender}/uploadDocument`, 
+          formData, 
+          {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        await axios.post(`${API_BASE_URL}/api/addNominee`, reqBody, {
+          headers: {
+            "Authorization": `Bearer ${user?.access_token}`
+          }
+        })
+          .then(() => {
+            f7router.navigate("/");
+            dispatch.doc.setDoc(null);
+            dispatch.contact.setContactActivity(null);
+          })
+          .catch((error) => {
+            if (error.response) {
+              console.error('Error Status:', error.response.status);
+              console.error('Error Data:', error.response.data);
+            } else if (error.request) {
+              console.error('No Response Received:', error.request);
+            } else {
+              console.error('Error Message:', error.message);
+            }
+          })
+      } finally {
+        setIsLoading(false);
+      }
+  
+      if (updatedDocState && Object.keys(updatedDocState).length > 0) {
+        // dispatch.multidoc.setDoc(updatedDocState);
+        f7router.navigate("/addNomineeReview");
+      } else {
+        console.error("No draggable states found for signers.");
+      }
+    }
+  }
+
   useEffect(() => {
     if (docState?.signers) {
-      console.log(docState?.signers);
       const initialStates = docState.signers.reduce((acc, signer) => {
-        console.log(signer);
         if (
           draggableStates[signer.email]?.x &&
           draggableStates[signer.email]?.y &&
@@ -113,6 +230,11 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
 
   return (
     <MyPage name="Request Signature">
+      {isLoading && 
+        <div className="">
+          <Spinner isFull={false} />
+        </div>
+      }
       <Header
         title="Request Signature"
         back={() => {
@@ -191,46 +313,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
           )
         }
         isLoading={false}
-        onClick={() => {
-          if (step === "signStep") {
-            setStep("checkStep");
-          } else if (step === "checkStep") {
-            // Collect the coordinates for all signers
-            const updatedDocState: SignerPositionState | undefined= docState?.signers.reduce(
-              (acc, signer) => {
-                const signerDraggableState = draggableStates[signer.email];
-                console.log("Signers draggable state: ");
-                console.log(signerDraggableState);
-                if (signerDraggableState) {
-                  signer.originX =  signerDraggableState.x,
-                  signer.originY = signerDraggableState.y,
-                  signer.bottomLeftXCoordinate = signerDraggableState.topLeftXCoordinate;
-                  signer.bottomLeftYCoordinate = signerDraggableState.topLeftYCoordinateFromPageBottomLeftCorner - 24;
-                  signer.pageNumber = signerDraggableState.pageNumber;
-                  acc[signer.email] = {
-                    pageNumber: signerDraggableState.pageNumber,
-                    bottomLeftXCoordinate: signerDraggableState.topLeftXCoordinate,
-                    bottomLeftYCoordinate:
-                      signerDraggableState.topLeftYCoordinateFromPageBottomLeftCorner - 24,
-                  };
-                }
-                return acc;
-              },
-              {} as SignerPositionState
-            );
-            
-            console.log("Signers:");
-            console.log(docState?.signers);
-    
-            if (updatedDocState && Object.keys(updatedDocState).length > 0) {
-              console.log(updatedDocState);
-              // dispatch.multidoc.setDoc(updatedDocState);
-              f7router.navigate("/addNomineeReview");
-            } else {
-              console.error("No draggable states found for signers.");
-            }
-          }
-        }}
+        onClick={handleContinue}
       />
       </div>
       {openModal && (

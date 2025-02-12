@@ -10,7 +10,7 @@ interface BottomBarProps {
 }
 const BottomBar = ({ open, setCurrentTab, currentTab }: BottomBarProps) => {
   return (
-    <section className={`flex bg-white w-full border-t border-[#E7EDF3] z-10 pb-[34px]`}>
+    <section className={`flex bg-white absolute bottom-0 w-full border-t border-[#E7EDF3] z-10 pb-[34px]`}>
       <div className="w-full py-[10px] px-1">
         <div
           onClick={() => setCurrentTab("home")}

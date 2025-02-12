@@ -125,7 +125,7 @@ const RequestSignaturesStep = ({
             <div className="bg-[#386aef] flex items-center justify-center mx-[10px] rounded-xl w-11 h-11">
               <img src={Photos} />
             </div>
-            <p className="text-sm font-medium">Photos</p>
+            <p className="text-sm font-medium text-[#BCD5FB]">Photos</p>
           </label>
           <input
             type="file"
@@ -138,6 +138,7 @@ const RequestSignaturesStep = ({
               }
             }}
             className="hidden"
+            disabled={true}
           />
         </div>
         <div>
@@ -145,7 +146,7 @@ const RequestSignaturesStep = ({
             <div className="bg-[#386aef] flex items-center justify-center mx-[10px] rounded-xl w-11 h-11">
               <img src={Camera} />
             </div>
-            <p className="text-sm font-medium">Camera</p>
+            <p className="text-sm font-medium text-[#BCD5FB]">Camera</p>
           </label>
           <input
             type="file"
@@ -159,12 +160,12 @@ const RequestSignaturesStep = ({
               }
             }}
             className="hidden"
+            disabled={true}
           />
         </div>
       </div>
       <div
         onClick={() => {
-          setType("main");
           close();
         }}
         className="bg-[#0A3DC7] rounded-full w-14 h-14 flex items-center justify-center -left-4 bottom-0"

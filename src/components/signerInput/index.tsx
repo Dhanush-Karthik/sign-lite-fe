@@ -11,19 +11,14 @@ interface SignerInputProps {
 const SignerInput: React.FC<SignerInputProps> = ({ index, signer, handleInputChange, handleRemoveSigner, }) => {
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <div className="w-full flex justify-between">
         <p className="text-sm font-medium text-primaryTextColor">Signer {index + 1}</p>
         <div className="flex justify-center items-center">
-          <div onClick={() => handleRemoveSigner(index)} className="bg-[#63788E] rounded-full w-6 h-6 flex items-center justify-center">
-              <p className="text-xl text-white pb-[1px]">-</p>
-              {/* <img width={"12px"} height={"10px"} src={DustBin} /> */}
+          <div onClick={() => handleRemoveSigner(index)}>
+              <p className="text-xs text-[#d11a2a] pb-[1px]">Remove</p>
           </div>
         </div> 
-        {/* <button
-          className="text-red-500"
-          onClick={() => handleRemoveSigner(index)}
-        >X</button> */}
       </div>
       <Input
         label="Name"

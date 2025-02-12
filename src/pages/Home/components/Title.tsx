@@ -11,8 +11,8 @@ const Title = ({
 }) => {
   return (
     <>
-      <div className="p-4 flex w-full gap-4 justify-between items-center">
-        <Back onClick={() => setType("main")} stroke="#fff" />
+      <div className="p-4 ml-3 flex w-full justify-center items-center">
+        {/* <Back onClick={() => setType("main")} stroke="#fff" /> */}
         {
           {
             request: (

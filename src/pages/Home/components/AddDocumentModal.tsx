@@ -14,7 +14,7 @@ interface AddDocumentModalProps {
 }
 
 export const AddDocumentModal = ({ isOpen, close }: AddDocumentModalProps) => {
-  const [type, setType] = useState<"request" | "sign" | "main">("main");
+  const [type, setType] = useState<"request" | "sign" | "main">("request");
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 flex items-end justify-center bg-black bg-opacity-50 z-50">
