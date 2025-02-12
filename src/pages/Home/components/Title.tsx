@@ -1,10 +1,8 @@
-import Back from "@/assets/components/Back";
 import RequestIcon from "@/assets/requestIcon.svg";
 import { Dispatch, SetStateAction } from "react";
 
 const Title = ({
   type,
-  setType,
 }: {
   type: "request" | "sign";
   setType: Dispatch<SetStateAction<"request" | "sign" | "main">>;

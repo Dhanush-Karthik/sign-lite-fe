@@ -10,7 +10,6 @@ import { nonceGenerator } from "@/core/utils";
 
 const RequestSignaturesStep = ({
   close,
-  setType,
 }: {
   close: () => void;
   setType: Dispatch<SetStateAction<"request" | "sign" | "main">>;
