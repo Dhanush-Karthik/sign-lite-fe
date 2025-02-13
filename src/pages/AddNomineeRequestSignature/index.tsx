@@ -13,6 +13,7 @@ import axios from "axios";
 import { API_BASE_URL } from "@/constants";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
 import Spinner from "@/components/Spinner";
+import SuccessPopup from "@/components/SuccessPopup/SuccessPopup";
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -53,6 +54,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
   const dispatch = useAppDispatch();
   const screen = useAppSelector((state) => state.screen);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
 
   const [visiblePage, setVisiblePage] = useState<number>();
@@ -148,28 +150,30 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
             "Authorization": `Bearer ${user?.access_token}`
           }
         })
-          .then(() => {
-            f7router.navigate("/");
-            dispatch.doc.setDoc(null);
-            dispatch.contact.setContactActivity(null);
-          })
-          .catch((error) => {
-            if (error.response) {
-              console.error('Error Status:', error.response.status);
-              console.error('Error Data:', error.response.data);
-            } else if (error.request) {
-              console.error('No Response Received:', error.request);
-            } else {
-              console.error('Error Message:', error.message);
+        
+        setIsSuccess(true);
+        dispatch.doc.setDoc(null);
+        dispatch.contact.setContactActivity(null);
+      } catch(error) {
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            console.error('Error Status:', error.response.status);
+            console.error('Error Data:', error.response.data);
+    
+            if (error.response.status != 200) {
+              console.error('Bad Request:', error.response.data);
             }
-          })
+          }
+        } else {
+          console.error('Unexpected Error:', error);
+        }
       } finally {
         setIsLoading(false);
       }
   
       if (updatedDocState && Object.keys(updatedDocState).length > 0) {
         // dispatch.multidoc.setDoc(updatedDocState);
-        f7router.navigate("/addNomineeReview");
+        f7router.navigate("/");
       } else {
         console.error("No draggable states found for signers.");
       }
@@ -235,6 +239,12 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
           <Spinner isFull={false} />
         </div>
       }
+
+      {
+        isSuccess &&
+          <SuccessPopup f7router={f7router}/>
+      }
+      
       <Header
         title="Request Signature"
         back={() => {
