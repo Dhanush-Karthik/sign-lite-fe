@@ -306,7 +306,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
       </div>
       <div className="w-full pb-[42px] pt-[6px] px-4 flex gap-4 border-t-2 border-buttonContainer">
       <Button
-        text="Continue"
+        text="Send"
         disabled={
           !docState?.signers.every(
             (signer) => draggableStates[signer.email] !== undefined
