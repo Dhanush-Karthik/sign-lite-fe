@@ -149,9 +149,8 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
           headers: {
             "Authorization": `Bearer ${user?.access_token}`
           }
-        })
-        
-        setIsSuccess(true);
+        }).then(() => setIsSuccess(true));
+
         dispatch.doc.setDoc(null);
         dispatch.contact.setContactActivity(null);
       } catch(error) {
@@ -173,7 +172,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
   
       if (updatedDocState && Object.keys(updatedDocState).length > 0) {
         // dispatch.multidoc.setDoc(updatedDocState);
-        f7router.navigate("/");
+        setIsSuccess(true);
       } else {
         console.error("No draggable states found for signers.");
       }
