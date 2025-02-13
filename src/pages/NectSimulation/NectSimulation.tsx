@@ -14,6 +14,9 @@ const NectSimulation: React.FC = () => {
     axios.get(`https://shiftpen.dev.grootan.net/api/v1/nect/callback?code=${code}`)
       .then(() => {
         setState("success");
+        if ((window as any).AndroidInterface) {
+          (window as any).AndroidInterface.closeWebView();
+        }
       })
       .catch(error => {
           console.error('Error Message:', error.message);
