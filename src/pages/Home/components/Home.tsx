@@ -79,6 +79,9 @@ const Home = ({ documents }: HomeProps) => {
           height: `calc(100vh - 225px - ${safeAreas?.top ?? 0}px - 34px)`,
         }}
       >
+        <div onClick={()=> {window.location.replace(
+ 'https://share.cloud.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457'
+);}}>Click me to redirect to chat</div>
         {/* <p className="mb-6 font-bold leading-[26px] text-xl">Recent activity</p> */}
         <div className="flex flex-col gap-5 items-end h-full overflow-scroll hidden">
           {loading ? (
