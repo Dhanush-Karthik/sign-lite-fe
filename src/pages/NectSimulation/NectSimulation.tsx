@@ -14,9 +14,6 @@ const NectSimulation: React.FC = () => {
     axios.get(`https://shiftpen.dev.grootan.net/api/v1/nect/callback?code=${code}`)
       .then(() => {
         setState("success");
-        if ((window as any).AndroidInterface) {
-          (window as any).AndroidInterface.closeWebView();
-        }
       })
       .catch(error => {
           console.error('Error Message:', error.message);
@@ -77,7 +74,7 @@ const NectSimulation: React.FC = () => {
         </p>
         <div className="mt-6 space-y-4">
           <button
-            onClick={()=> window.close()}
+            onClick={()=> {window.location.replace('https://share.gondor-shift-qa-fpl6t.gondor.dev.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457')}}
             className="flex items-center justify-center w-full py-3 rounded-full bg-green-300 text-black font-semibold text-lg shadow-md hover:bg-green-400 transition"
           >
             Close window
@@ -94,7 +91,7 @@ const NectSimulation: React.FC = () => {
         </p>
         <div className="mt-6 space-y-4">
           <button
-            onClick={()=> window.close()}
+            onClick={()=> {window.location.replace('https://share.gondor-shift-qa-fpl6t.gondor.dev.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457')}}
             className="flex items-center justify-center w-full py-3 rounded-full bg-green-300 text-black font-semibold text-lg shadow-md hover:bg-green-400 transition"
           >
             Close window
