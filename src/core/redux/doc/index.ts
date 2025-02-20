@@ -64,6 +64,12 @@ const docs = createModel<RootModel>()({
       return response;
     },
 
+    async getAllSignerDocs({ email }: { email: string }) {
+      const url = `${API_PATHS.GET_ALL_SIGNER_DOCS}`.replace("email", email);
+      const response = await miniappClient.get(url);
+      return response.data;
+    },
+
     async getOneDoc({ mediaId, fileName }: { mediaId?: string; fileName?: string }) {
       const response: Blob = await miniappClient.get(
         mediaId
