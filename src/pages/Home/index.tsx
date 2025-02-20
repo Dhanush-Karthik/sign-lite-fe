@@ -13,6 +13,7 @@ const MainPage = () => {
   const email = useAppSelector((state) => state.auth.user?.email);
   const [currentTab, setCurrentTab] = useState<"home" | "documents">("home");
   const [documents, setDocuments] = useState<DocType[]>([]);
+  const [newDocuments, setNewDocuments] = useState<DocType[]>([]);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -21,8 +22,13 @@ const MainPage = () => {
       const docs = await dispatch.doc.getAllDocs({ email });
       setDocuments(docs);
     };
-
+    const fetchSignerDocuments = async () => {
+      if (!email) return;
+      const docs = await dispatch.doc.getAllSignerDocs({ email });
+      setNewDocuments(docs);
+    };
     fetchDocuments();
+    fetchSignerDocuments();
   }, []);
 
   return (
@@ -30,7 +36,7 @@ const MainPage = () => {
       {
         {
           home: <Home documents={documents} />,
-          documents: <Documents documents={documents} />,
+          documents: <Documents documents={newDocuments} />,
         }[currentTab]
       }
       <BottomBar open={open} setCurrentTab={setCurrentTab} currentTab={currentTab} />
