@@ -136,10 +136,10 @@ export const Documents = ({ documents }: DocumentsProps) => {
         })
       );
 
-      if (response.data?.message?.toLowerCase() === "Document push success") {
+      if (response.data?.message?.toLowerCase() === "document push success") {
          window.location.replace(CHAT_SERVİCE_SHARE_URL);
          setShowSignPopup({ show: true, message: "Successfully pushed the document to secure chat ", showSignBtn: false });
-      } else if (response.data?.message?.toLowerCase() === "Pending task already exists for the user") {
+      } else if (response.data?.message?.toLowerCase() === "pending task already exists for the user") {
         setShowSignPopup({ show: true, message: "Please complete are reject the existing pending document", showSignBtn: false });
       }
     } catch (error) {
