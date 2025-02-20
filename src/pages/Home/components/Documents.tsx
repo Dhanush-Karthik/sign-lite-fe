@@ -11,7 +11,7 @@ import { SkeletonBlock } from "framework7-react";
 import NoDocs from "@/assets/components/NoDocs";
 import { API_PATHS } from "@/constants";
 import { miniappClient } from "@/core/miniappClient";
-import { CHAT_SERVİCE_SHARE_URL } from "@/constants";
+import { SECURE_CHAT_SHARE_URL } from "@/constants";
 
 interface DocumentType {
   id: string;
@@ -31,7 +31,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
     "All" | "Initiated" | "Pending" | "Completed"
   >("All");
   const [searchValue, setSearchValue] = useState<string>("");
-  const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", showSignBtn: true});
+  const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", showSignBtn: true, heading : ""});
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   const loading = useAppSelector((state) => state.loading.models.doc);
@@ -126,7 +126,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
     try {
       const url = `${API_PATHS.PUSH_DOC_TO_CHAT}`.replace("email", selectedDocument.signer_id);
       console.log(url);
-      const response = await miniappClient.post(
+      const response : {message : String} = await miniappClient.post(
         url,
         JSON.stringify({
           processInstanceId: selectedDocument.process_instance_id,
@@ -136,14 +136,14 @@ export const Documents = ({ documents }: DocumentsProps) => {
         })
       );
 
-      if (response.data?.message?.toLowerCase() === "document push success") {
-         window.location.replace(CHAT_SERVİCE_SHARE_URL);
-         setShowSignPopup({ show: true, message: "Successfully pushed the document to secure chat ", showSignBtn: false });
-      } else if (response.data?.message?.toLowerCase() === "pending task already exists for the user") {
-        setShowSignPopup({ show: true, message: "Please complete are reject the existing pending document", showSignBtn: false });
+      if (response.message?.toLowerCase() === "document push success") {
+         window.location.replace(SECURE_CHAT_SHARE_URL);
+         setShowSignPopup({ show: true, message: "Successfully pushed the document to secure chat ", showSignBtn: false, heading: ""});
+      } else if (response.message?.toLowerCase() === "pending task already exists for the user") {
+        setShowSignPopup({ show: true, message: "Please complete or reject the pending document", showSignBtn: false, heading: "Previous Document Pending"});
       }
     } catch (error) {
-      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", showSignBtn: false });
+      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", showSignBtn: false, heading: ""});
     }
   };
 
@@ -258,7 +258,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
               .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
               .map((key, index) => (
                 <div className="w-full" key={key}>
-                  <h2 className="text-sm font-medium leading-normal">
+                  <h2 className="text-sm font-medium leading-normal hidden">
                     {getDateTitle(new Date(key))}
                   </h2>
                   {groupedData[key].map((item, index2) => (
@@ -314,7 +314,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedDocument(item);
-                                setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", showSignBtn: true });
+                                setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", showSignBtn: true, heading: ""});
                               }}
                             />
                             <p className="text-gray text-xs hidden">
@@ -356,7 +356,8 @@ export const Documents = ({ documents }: DocumentsProps) => {
       {showSignPopup.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[80%] max-w-md">
-            <h3 className="text-lg font-medium mb-4">{showSignPopup.message}</h3>
+            <h3 className="flex justify-center text-lg font-bold mb-4"></h3>
+            <h3 className="flex justify-center text-lg font-medium mb-4">{showSignPopup.message}</h3>
             <div className="flex justify-center gap-4 mt-6">
               {showSignPopup.showSignBtn && (
                 <button
@@ -367,7 +368,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                 </button>
               )}
               <button
-                onClick={() => setShowSignPopup({ show: false, message: "Please complete are reject the existing pending document", showSignBtn: false })}
+                onClick={() => setShowSignPopup({ show: false, message: "Please complete are reject the existing pending document", showSignBtn: false, heading: ""})}
                 className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg transition duration-200 hover:bg-gray-200 active:bg-gray-300"
               >
                 Close
