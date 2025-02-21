@@ -11,7 +11,7 @@ import { SkeletonBlock } from "framework7-react";
 import NoDocs from "@/assets/components/NoDocs";
 import { API_PATHS } from "@/constants";
 import { miniappClient } from "@/core/miniappClient";
-import { SECURE_CHAT_SHARE_URL } from "@/constants";
+//import { SECURE_CHAT_SHARE_URL } from "@/constants";
 
 interface DocumentType {
   id: string;
@@ -356,7 +356,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
       {showSignPopup.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[80%] max-w-md">
-            <h3 className="flex justify-center text-lg font-bold mb-4"></h3>
+            <h3 className="flex justify-center text-lg font-bold mb-4">{showSignPopup.heading}</h3>
             <h3 className="flex justify-center text-lg font-medium mb-4">{showSignPopup.message}</h3>
             <div className="flex justify-center gap-4 mt-6">
               {showSignPopup.showSignBtn && (
