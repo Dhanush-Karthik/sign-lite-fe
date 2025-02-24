@@ -381,7 +381,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
           <h3 className="flex text-center justify-center text-lg font-bold mb-1">
             {showSignPopup.heading}
           </h3>
-          <h3 className="flex text-center justify-center text-sm text-gray-600 font-medium mb-3">
+          <h3 className="flex text-center justify-center text-sm text-gray font-medium mb-3">
             {showSignPopup.message}
           </h3>
           <div className="flex justify-center gap-4 mt-6">
