@@ -12,6 +12,7 @@ import NoDocs from "@/assets/components/NoDocs";
 import { API_PATHS } from "@/constants";
 import { miniappClient } from "@/core/miniappClient";
 import { SECURE_CHAT_SHARE_URL } from "@/constants";
+import Spinner from "@/components/Spinner";
 
 interface DocumentType {
   id: string;
@@ -31,11 +32,12 @@ export const Documents = ({ documents }: DocumentsProps) => {
     "All" | "Initiated" | "Pending" | "Completed"
   >("All");
   const [searchValue, setSearchValue] = useState<string>("");
-  const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", primaryButtonText: "", secondaryButtonText:"",  showSignBtn: true, heading : ""});
+  const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", primaryButtonText: "", secondaryButtonText:"",  showSignBtn: true, heading : "", isPending: false});
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   const loading = useAppSelector((state) => state.loading.models.doc);
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const StatusMock = [
     {
@@ -124,6 +126,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         secondaryButtonText: "",
         showSignBtn: false,
         heading: "",
+        isPending: false
       });
     }
   };
@@ -134,10 +137,11 @@ export const Documents = ({ documents }: DocumentsProps) => {
     setSearchValue(e.target.value);
   };
 
-  const handleSignDocument = async () => {
+  const handleSignDocument = async (isPending: boolean) => {
     if (!selectedDocument) return;
 
     try {
+      setIsLoading(true);
       const url = `${API_PATHS.PUSH_DOC_TO_CHAT}`.replace("email", selectedDocument.signer_id);
       console.log(url);
       const response : {message : String} = await miniappClient.post(
@@ -152,12 +156,13 @@ export const Documents = ({ documents }: DocumentsProps) => {
 
       if (response.message?.toLowerCase() === "document push success") {
          window.location.replace(SECURE_CHAT_SHARE_URL);
-        //  setShowSignPopup({ show: true, message: "Successfully pushed the document to secure chat ", showSignBtn: false, heading: ""});
-      } else if (response.message?.toLowerCase() === "pending task already exists for the user") {
-        setShowSignPopup({ show: true, message: "Please complete or reject the pending document", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "Previous Document Pending"});
+      } else if (!isPending && response.message?.toLowerCase() === "pending task already exists for the user") {
+        setShowSignPopup({ show: true, message: "Please complete or reject the pending document", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "Previous Document Pending", isPending: false});
       }
     } catch (error) {
-      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: ""});
+      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "", isPending: false});
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -188,6 +193,11 @@ export const Documents = ({ documents }: DocumentsProps) => {
 
   return (
     <>
+      {isLoading && 
+        <div className="">
+          <Spinner isFull={false} />
+        </div>
+      }
       <section title="top">
         <div className="pt-[3px] pb-[13px] h-14 px-4">
           {loading ? (
@@ -281,12 +291,12 @@ export const Documents = ({ documents }: DocumentsProps) => {
                         onClick={() => {
                           if(item.status === "INITIATED") {
                             setSelectedDocument(item);
-                            setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: true, heading: "Action required"});
+                            setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: true, heading: "Action required", isPending: false});
                           }
 
                           if(item.status === "PENDING") {
                             setSelectedDocument(item);
-                            setShowSignPopup({ show: true, message: "Document signature is still pending. Do you want to continue signing the document?", primaryButtonText:"Yes, Continue", secondaryButtonText: "No, Cancel Request", showSignBtn: true, heading: "Action required"});
+                            setShowSignPopup({ show: true, message: "Document signature is still pending. Do you want to continue signing the document?", primaryButtonText:"Yes, Continue", secondaryButtonText: "No, Cancel Request", showSignBtn: true, heading: "Action required", isPending: true});
                           }
                         }}
                         className={`flex w-full gap-5 mt-4 justify-between ${
@@ -387,7 +397,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
           <div className="flex justify-center gap-4 mt-6">
             {showSignPopup.showSignBtn && (
               <button
-                onClick={handleSignDocument}
+                onClick={() => handleSignDocument(showSignPopup.isPending)}
                 className="px-4 py-2 bg-[#1D56EE] text-white rounded-lg transition duration-200 hover:bg-[#1540B2] active:bg-[#12369B]"
               >
                 {showSignPopup.primaryButtonText}
@@ -402,6 +412,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                   secondaryButtonText: "Close",
                   showSignBtn: false,
                   heading: "",
+                  isPending: false
                 })
               }
               className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg transition duration-200 hover:bg-gray-200 active:bg-gray-300"
