@@ -1,7 +1,7 @@
 import PendingSVG from "@/assets/StatusLogos/pending.svg";
 import InitiatedSVG from "@/assets/StatusLogos/draft.svg"; // Reusing draft icon for initiated
 import CompletedSVG from "@/assets/StatusLogos/completed.svg";
-import EyeIcon from "@/assets/eye.svg";
+import SignatureIcon from "@/assets/documentsign.svg";
 import { Fragment, useRef, useState } from "react";
 import SearchIcon from "@/assets/searchIcon.svg";
 import { f7 } from "framework7-react";
@@ -284,7 +284,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         ) : documents.length ? (
           <div className="flex flex-col items-end flex-1 overflow-scroll">
             {Object.keys(groupedData)
-              .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+              .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
               .map((key, index) => (
                 <div className="w-full" key={key}>
                   <h2 className="text-sm font-medium leading-normal hidden">
@@ -294,15 +294,9 @@ export const Documents = ({ documents }: DocumentsProps) => {
                     <Fragment key={index2}>
                       <div
                         onClick={() => {
-                          if(item.status === "INITIATED") {
-                            setSelectedDocument(item);
-                            setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: true, heading: "Action required", isPending: false});
-                          }
-
-                          if(item.status === "PENDING") {
-                            setSelectedDocument(item);
-                            setShowSignPopup({ show: true, message: "Document signature is still pending. Do you want to continue signing the document?", primaryButtonText:"Yes, Continue", secondaryButtonText: "No, Cancel Request", showSignBtn: true, heading: "Action required", isPending: true});
-                          }
+                          f7.views.main.router.navigate("/details", {
+                            props: { item },
+                          })
                         }}
                         className={`flex w-full gap-5 mt-4 justify-between ${
                           index === Object.keys(groupedData).length - 1 &&
@@ -341,25 +335,35 @@ export const Documents = ({ documents }: DocumentsProps) => {
                             </div>
                           </div>
                         </div>
-
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <img 
-                            src={EyeIcon} 
-                            onClick={() => 
-                              f7.views.main.router.navigate("/details", {
-                                props: { item },
-                              })
-                            }
-                          />
-                          <p className="text-gray text-xs hidden">
-                            {new Date().toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                            })}
-                          </p>
-                        </div>
-                        
+                        {
+                          item.status !== "COMPLETED" && 
+                            <div className="flex flex-col items-center justify-center gap-2 pr-3">
+                              <img 
+                                width={"20px"}
+                                src={SignatureIcon} 
+                                onClick={(e) => {
+                                  if(item.status === "INITIATED") {
+                                    e.stopPropagation();
+                                    setSelectedDocument(item);
+                                    setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: true, heading: "Action required", isPending: false});
+                                  }
+        
+                                  if(item.status === "PENDING") {
+                                    e.stopPropagation();
+                                    setSelectedDocument(item);
+                                    setShowSignPopup({ show: true, message: "Document signature is still pending. Do you want to continue signing the document?", primaryButtonText:"Yes, Continue", secondaryButtonText: "No, Cancel Request", showSignBtn: true, heading: "Action required", isPending: true});
+                                  }
+                                }}
+                              />
+                              <p className="text-gray text-xs hidden">
+                                {new Date().toLocaleTimeString("en-US", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })}
+                              </p>
+                            </div> 
+                        }
                       </div>
                       <div
                         className={`w-[calc(100%-52px)] border-b my-3 float-end border-[#E6E8EA] ${
