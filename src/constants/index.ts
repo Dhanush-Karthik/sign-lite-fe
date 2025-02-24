@@ -31,7 +31,7 @@ const CHAT_SERVICE_ID = "0b669933-4742-4c21-8027-78f62d001f8a";
 
 const CHAT_SERVİCE_SHARE_URL = `https://share.mycityapp.cloud.test.kobil.com/kobilservice?sID=${CHAT_SERVICE_ID}`;
 
-const SECURE_CHAT_SHARE_URL = `https://share.gondor-shift-dev-don8u.gondor.dev.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457`;
+const SECURE_CHAT_SHARE_URL = `https://share.gondor-shift-qa-fpl6t.gondor.dev.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457`;
 
 export {
   API_PATHS,

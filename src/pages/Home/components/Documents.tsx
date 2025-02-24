@@ -138,7 +138,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
 
       if (response.message?.toLowerCase() === "document push success") {
          window.location.replace(SECURE_CHAT_SHARE_URL);
-         setShowSignPopup({ show: true, message: "Successfully pushed the document to secure chat ", showSignBtn: false, heading: ""});
+        //  setShowSignPopup({ show: true, message: "Successfully pushed the document to secure chat ", showSignBtn: false, heading: ""});
       } else if (response.message?.toLowerCase() === "pending task already exists for the user") {
         setShowSignPopup({ show: true, message: "Please complete or reject the pending document", showSignBtn: false, heading: "Previous Document Pending"});
       }
