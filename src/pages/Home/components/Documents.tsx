@@ -2,7 +2,8 @@ import PendingSVG from "@/assets/StatusLogos/pending.svg";
 import InitiatedSVG from "@/assets/StatusLogos/draft.svg"; // Reusing draft icon for initiated
 import CompletedSVG from "@/assets/StatusLogos/completed.svg";
 import MoreIcon from "@/assets/moreIcon.svg";
-import { Fragment, useState } from "react";
+import EyeIcon from "@/assets/eye.svg";
+import { Fragment, useRef, useState } from "react";
 import SearchIcon from "@/assets/searchIcon.svg";
 import { f7 } from "framework7-react";
 import { useAppSelector } from "@/core/redux/store";
@@ -31,10 +32,11 @@ export const Documents = ({ documents }: DocumentsProps) => {
     "All" | "Initiated" | "Pending" | "Completed"
   >("All");
   const [searchValue, setSearchValue] = useState<string>("");
-  const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", showSignBtn: true, heading : ""});
+  const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", primaryButtonText: "", secondaryButtonText:"",  showSignBtn: true, heading : ""});
   const [selectedDocument, setSelectedDocument] = useState<DocumentType | null>(null);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   const loading = useAppSelector((state) => state.loading.models.doc);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const StatusMock = [
     {
@@ -114,6 +116,19 @@ export const Documents = ({ documents }: DocumentsProps) => {
     return matchesStatus && matchesSearch;
   });
 
+  const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+      setShowSignPopup({
+        show: false,
+        message: "",
+        primaryButtonText: "",
+        secondaryButtonText: "",
+        showSignBtn: false,
+        heading: "",
+      });
+    }
+  };
+
   const groupedData = groupByDate(filteredDocuments);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,10 +155,10 @@ export const Documents = ({ documents }: DocumentsProps) => {
          window.location.replace(SECURE_CHAT_SHARE_URL);
         //  setShowSignPopup({ show: true, message: "Successfully pushed the document to secure chat ", showSignBtn: false, heading: ""});
       } else if (response.message?.toLowerCase() === "pending task already exists for the user") {
-        setShowSignPopup({ show: true, message: "Please complete or reject the pending document", showSignBtn: false, heading: "Previous Document Pending"});
+        setShowSignPopup({ show: true, message: "Please complete or reject the pending document", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "Previous Document Pending"});
       }
     } catch (error) {
-      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", showSignBtn: false, heading: ""});
+      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: ""});
     }
   };
 
@@ -205,7 +220,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         title="content"
         className="bg-white flex flex-col rounded-t-[20px] px-4 pt-6"
         style={{
-          height: `calc(100vh - 187px - ${safeAreas?.top ?? 0}px - 34px)`,
+          height: `calc(100vh - 110px - ${safeAreas?.top ?? 0}px - 34px)`,
         }}
       >
         <div className="w-full flex gap-2 mb-6">
@@ -264,11 +279,17 @@ export const Documents = ({ documents }: DocumentsProps) => {
                   {groupedData[key].map((item, index2) => (
                     <Fragment key={index2}>
                       <div
-                        onClick={() =>
-                          f7.views.main.router.navigate("/details", {
-                            props: { item },
-                          })
-                        }
+                        onClick={() => {
+                          if(item.status === "INITIATED") {
+                            setSelectedDocument(item);
+                            setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: true, heading: "Action required"});
+                          }
+
+                          if(item.status === "PENDING") {
+                            setSelectedDocument(item);
+                            setShowSignPopup({ show: true, message: "Document signature is still pending. Do you want to continue signing the document?", primaryButtonText:"Yes, Continue", secondaryButtonText: "No, Cancel Request", showSignBtn: true, heading: "Action required"});
+                          }
+                        }}
                         className={`flex w-full gap-5 mt-4 justify-between ${
                           index === Object.keys(groupedData).length - 1 &&
                           index2 === groupedData[key].length - 1 &&
@@ -276,59 +297,58 @@ export const Documents = ({ documents }: DocumentsProps) => {
                         }`}
                       >
                         <div className="flex w-[calc(100%-50px)] gap-3">
-                          <div
-                            className={`p-3 rounded-xl w-[44px] h-[44px] flex justify-center items-center ${
-                              getStatusIcon(item.status).bgColor
-                            }`}
-                          >
-                            <img
-                              src={getStatusIcon(item.status).icon}
-                              className="max-w-6"
-                            />
+                          <div className="flex items-center">
+                            <div
+                              className={`p-3 rounded-xl w-[44px] h-[44px] flex justify-center items-center ${
+                                getStatusIcon(item.status).bgColor
+                              }`}
+                            >
+                              <img
+                                src={getStatusIcon(item.status).icon}
+                                className="max-w-6"
+                              />
+                            </div>
                           </div>
-
                           <div className="w-full text-mainDarkBlue overflow-hidden">
-                            <p className="mb-2 font-medium text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+                            <div className="font-medium text-sm whitespace-nowrap text-ellipsis overflow-hidden">
                               {item.file_name}
-                            </p>
-                            <div className="flex gap-2 items-center">
-                              <p className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] leading-3">
+                            </div>
+                            <div className="flex-col gap-3 items-center">
+                              <div className="text-[#63788E] mb-2 text-xs leading-normal">
+                                {item.signer_id}
+                              </div>
+                              <div className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] ">
                                 {item.status === "INITIATED"
                                   ? "To be signed"
                                   : item.status === "PENDING"
                                   ? "Pending"
                                   : "Completed"}
-                              </p>
-                              <div className="w-[3px] h-[3px] bg-[#BBBBC3]" />
-                              <p className="text-[#63788E] text-xs leading-normal">
-                                from {item.signer_id}
-                              </p>
+                              </div>
                             </div>
                           </div>
                         </div>
 
-                        {item.status === "INITIATED" && (
-                          <div className="flex flex-col items-end gap-2">
-                            <img 
-                              src={MoreIcon} 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedDocument(item);
-                                setShowSignPopup({ show: true, message: "Are you sure you want to sign the document?", showSignBtn: true, heading: ""});
-                              }}
-                            />
-                            <p className="text-gray text-xs hidden">
-                              {new Date().toLocaleTimeString("en-US", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              })}
-                            </p>
-                          </div>
-                        )}
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <img 
+                            src={EyeIcon} 
+                            onClick={() => 
+                              f7.views.main.router.navigate("/details", {
+                                props: { item },
+                              })
+                            }
+                          />
+                          <p className="text-gray text-xs hidden">
+                            {new Date().toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })}
+                          </p>
+                        </div>
+                        
                       </div>
                       <div
-                        className={`w-[calc(100%-52px)] border-b my-5 float-end border-[#E6E8EA] ${
+                        className={`w-[calc(100%-52px)] border-b my-3 float-end border-[#E6E8EA] ${
                           index === Object.keys(groupedData).length - 1 &&
                           index2 === groupedData[key].length - 1 &&
                           "hidden"
@@ -354,28 +374,44 @@ export const Documents = ({ documents }: DocumentsProps) => {
 
       {/* Sign Document Popup */}
       {showSignPopup.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[80%] max-w-md">
-            <h3 className="flex justify-center text-lg font-bold mb-4">{showSignPopup.heading}</h3>
-            <h3 className="flex justify-center text-lg font-medium mb-4">{showSignPopup.message}</h3>
-            <div className="flex justify-center gap-4 mt-6">
-              {showSignPopup.showSignBtn && (
-                <button
-                  onClick={handleSignDocument}
-                  className="px-4 py-2 bg-[#1D56EE] text-white rounded-lg transition duration-200 hover:bg-[#1540B2] active:bg-[#12369B]"
-                >
-                  Yes, Sign
-                </button>
-              )}
+        <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={handleOutsideClick}
+      >
+        <div ref={modalRef} className="bg-white rounded-lg p-6 w-[80%] max-w-md">
+          <h3 className="flex text-center justify-center text-lg font-bold mb-1">
+            {showSignPopup.heading}
+          </h3>
+          <h3 className="flex text-center justify-center text-sm text-gray-600 font-medium mb-3">
+            {showSignPopup.message}
+          </h3>
+          <div className="flex justify-center gap-4 mt-6">
+            {showSignPopup.showSignBtn && (
               <button
-                onClick={() => setShowSignPopup({ show: false, message: "Please complete are reject the existing pending document", showSignBtn: false, heading: ""})}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg transition duration-200 hover:bg-gray-200 active:bg-gray-300"
+                onClick={handleSignDocument}
+                className="px-4 py-2 bg-[#1D56EE] text-white rounded-lg transition duration-200 hover:bg-[#1540B2] active:bg-[#12369B]"
               >
-                Close
+                {showSignPopup.primaryButtonText}
               </button>
-            </div>
+            )}
+            <button
+              onClick={() =>
+                setShowSignPopup({
+                  show: false,
+                  message: "Please complete or reject the existing pending document",
+                  primaryButtonText: "Yes, Sign",
+                  secondaryButtonText: "Close",
+                  showSignBtn: false,
+                  heading: "",
+                })
+              }
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg transition duration-200 hover:bg-gray-200 active:bg-gray-300"
+            >
+              {showSignPopup.secondaryButtonText}
+            </button>
           </div>
         </div>
+      </div>
       )}
     </>
   );
