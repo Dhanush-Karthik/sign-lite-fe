@@ -43,6 +43,7 @@ interface OutputSigner {
 }
 
 interface Output {
+  userId: string;
   signatureType: string;
   signers: OutputSigner[];
 }
@@ -102,6 +103,7 @@ const AddNomineeRequestSignature = ({ f7router }: { f7router: Router.Router }) =
       );
       
       const reqBody: Output = {
+        userId: user?.email!,
         signatureType: docState?.signatureType!,
         signers: [],
       };
