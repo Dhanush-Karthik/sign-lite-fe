@@ -140,6 +140,11 @@ export const Documents = ({ documents }: DocumentsProps) => {
   const handleSignDocument = async (isPending: boolean) => {
     if (!selectedDocument) return;
 
+    if(isPending) {
+      window.location.replace(SECURE_CHAT_SHARE_URL);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const url = `${API_PATHS.PUSH_DOC_TO_CHAT}`.replace("email", selectedDocument.signer_id);
@@ -156,7 +161,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
 
       if (response.message?.toLowerCase() === "document push success") {
          window.location.replace(SECURE_CHAT_SHARE_URL);
-      } else if (!isPending && response.message?.toLowerCase() === "pending task already exists for the user") {
+      } else if (response.message?.toLowerCase() === "pending task already exists for the user") {
         setShowSignPopup({ show: true, message: "Please complete or reject the pending document", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "Previous Document Pending", isPending: false});
       }
     } catch (error) {
@@ -384,7 +389,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
       {/* Sign Document Popup */}
       {showSignPopup.show && (
         <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20"
         onClick={handleOutsideClick}
       >
         <div ref={modalRef} className="bg-white rounded-lg p-6 w-[80%] max-w-md">
