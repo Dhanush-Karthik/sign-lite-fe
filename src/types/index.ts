@@ -76,7 +76,16 @@ type SentByMeType = {
   }[];
 };
 
-export type DocType = ReceivedByMeType & SentByMeType;
+type SignerDocType = {
+  id: string;
+  signer_id: string;
+  process_instance_id: string;
+  file_name: string;
+  task_id: string;
+  status: "INITIATED" | "PENDING" | "COMPLETED" | "FAILED" | "DRAFT";
+}
+
+export type DocType = ReceivedByMeType & SentByMeType & SignerDocType;
 
 export type SendDocType = {
   signatureFile: File;
