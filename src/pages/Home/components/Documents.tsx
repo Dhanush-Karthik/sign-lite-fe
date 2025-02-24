@@ -1,7 +1,6 @@
 import PendingSVG from "@/assets/StatusLogos/pending.svg";
 import InitiatedSVG from "@/assets/StatusLogos/draft.svg"; // Reusing draft icon for initiated
 import CompletedSVG from "@/assets/StatusLogos/completed.svg";
-import MoreIcon from "@/assets/moreIcon.svg";
 import EyeIcon from "@/assets/eye.svg";
 import { Fragment, useRef, useState } from "react";
 import SearchIcon from "@/assets/searchIcon.svg";
