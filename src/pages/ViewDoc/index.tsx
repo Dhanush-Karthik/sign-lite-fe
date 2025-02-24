@@ -45,7 +45,10 @@ export const ViewDoc = ({ f7router, item }: { f7router: Router.Router; item: Doc
       >
         <div className="flex-1 overflow-y-auto">
           {!pdf ? (
-            <p>Loading PDF...</p>
+            <>
+              <p>Loading PDF...</p>
+              <p>View PDF is currently unavailable</p>
+            </>
           ) : (
             <Document file={pdf} loading="Loading PDF..." onLoadSuccess={onDocumentLoadSuccess}>
               {Array.from({ length: pageCounts }, (_, i) => i + 1).map((num) => (

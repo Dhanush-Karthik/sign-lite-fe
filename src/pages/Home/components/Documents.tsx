@@ -294,7 +294,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                     <Fragment key={index2}>
                       <div
                         onClick={() => {
-                          f7.views.main.router.navigate("/details", {
+                          f7.views.main.router.navigate("/details/viewdoc", {
                             props: { item },
                           })
                         }}
