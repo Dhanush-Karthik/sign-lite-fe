@@ -1,6 +1,7 @@
 import PendingSVG from "@/assets/StatusLogos/pending.svg";
 import InitiatedSVG from "@/assets/StatusLogos/draft.svg"; // Reusing draft icon for initiated
 import CompletedSVG from "@/assets/StatusLogos/completed.svg";
+import FailedSVG from "@/assets/StatusLogos/failed.svg";
 import SignatureIcon from "@/assets/documentsign.svg";
 import { Fragment, useRef, useState } from "react";
 import SearchIcon from "@/assets/searchIcon.svg";
@@ -29,7 +30,7 @@ interface DocumentsProps {
 
 export const Documents = ({ documents }: DocumentsProps) => {
   const [selectedStatusOption, setSelectedStatusOption] = useState<
-    "All" | "Initiated" | "Pending" | "Completed"
+    "All" | "Initiated" | "Pending" | "Completed" | "Failed/Rejected"
   >("All");
   const [searchValue, setSearchValue] = useState<string>("");
   const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", primaryButtonText: "", secondaryButtonText:"",  showSignBtn: true, heading : "", isPending: false});
@@ -69,6 +70,14 @@ export const Documents = ({ documents }: DocumentsProps) => {
           item.file_name.toLowerCase().includes(searchValue.toLowerCase())
       ).length,
       status: "Completed",
+    },
+    {
+      count: documents.filter(
+        (item) =>
+          item.status === "FAILED" &&
+          item.file_name.toLowerCase().includes(searchValue.toLowerCase())
+      ).length,
+      status: "Failed/Rejected",
     },
   ];
 
@@ -171,6 +180,34 @@ export const Documents = ({ documents }: DocumentsProps) => {
     }
   };
 
+  const handleSecondaryButtonClick = async (selectedDocument: DocumentType | null, isReject: boolean) => {
+    if(!isReject) {
+      setShowSignPopup({show: false, message: "", primaryButtonText: "", secondaryButtonText: "", showSignBtn: false, heading: "", isPending: false});
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const url = `${API_PATHS.PUSH_DOC_TO_CHAT}`.replace("email", selectedDocument!.signer_id) + "?reject=true";
+      console.log(url);
+      await miniappClient.post(
+        url,
+        JSON.stringify({
+          processInstanceId: selectedDocument!.process_instance_id,
+          taskId: selectedDocument!.task_id,
+          userId: selectedDocument!.signer_id,
+          documentName: selectedDocument!.file_name,
+        })
+      );
+
+      setShowSignPopup({ show: true, message: "The signature request is rejected successfully", primaryButtonText:"", secondaryButtonText: "Close", showSignBtn: false, heading: "Request rejected", isPending: false});
+    } catch (error) {
+      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "", isPending: false});
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "INITIATED":
@@ -187,6 +224,11 @@ export const Documents = ({ documents }: DocumentsProps) => {
         return {
           icon: CompletedSVG,
           bgColor: "bg-[#54BE8C1F]"
+        };
+      case "FAILED":
+        return {
+          icon: FailedSVG,
+          bgColor: "bg-[#EF4B341F]"
         };
       default:
         return {
@@ -237,7 +279,8 @@ export const Documents = ({ documents }: DocumentsProps) => {
           height: `calc(100vh - 110px - ${safeAreas?.top ?? 0}px - 34px)`,
         }}
       >
-        <div className="w-full flex gap-2 mb-6">
+        <div className="w-full overflow-x-auto">
+        <div className="flex gap-2 mb-6 whitespace-nowrap">
           {StatusMock.map((item) =>
             loading ? (
               <SkeletonBlock
@@ -254,7 +297,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                 key={item.status}
                 onClick={() =>
                   setSelectedStatusOption(
-                    item.status as "All" | "Initiated" | "Pending" | "Completed"
+                    item.status as "All" | "Initiated" | "Pending" | "Completed" | "Failed/Rejected"
                   )
                 }
                 className={`px-[14px] rounded-[100px] py-[6px] flex gap-[6px] items-center ${
@@ -279,6 +322,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
             )
           )}
         </div>
+      </div>
         {loading ? (
           <Skeleton documentPage />
         ) : documents.length ? (
@@ -323,20 +367,22 @@ export const Documents = ({ documents }: DocumentsProps) => {
                             </div>
                             <div className="flex-col gap-3 items-center">
                               <div className="text-[#63788E] mb-2 text-xs leading-normal">
-                                {item.signer_id}
+                                from {item.signer_id}
                               </div>
                               <div className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] ">
                                 {item.status === "INITIATED"
                                   ? "To be signed"
                                   : item.status === "PENDING"
                                   ? "Pending"
+                                  : item.status === "FAILED" 
+                                  ? "Failed/Rejected"
                                   : "Completed"}
                               </div>
                             </div>
                           </div>
                         </div>
                         {
-                          item.status !== "COMPLETED" && 
+                          !(item.status === "COMPLETED" || item.status === "FAILED") && 
                             <div className="flex flex-col items-center justify-center gap-2 pr-3">
                               <img 
                                 width={"20px"}
@@ -413,17 +459,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
               </button>
             )}
             <button
-              onClick={() =>
-                setShowSignPopup({
-                  show: false,
-                  message: "Please complete or reject the existing pending document",
-                  primaryButtonText: "Yes, Sign",
-                  secondaryButtonText: "Close",
-                  showSignBtn: false,
-                  heading: "",
-                  isPending: false
-                })
-              }
+              onClick={() => handleSecondaryButtonClick(selectedDocument, showSignPopup.isPending)}
               className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg transition duration-200 hover:bg-gray-200 active:bg-gray-300"
             >
               {showSignPopup.secondaryButtonText}
