@@ -30,7 +30,7 @@ interface DocumentsProps {
 
 export const Documents = ({ documents }: DocumentsProps) => {
   const [selectedStatusOption, setSelectedStatusOption] = useState<
-    "All" | "Initiated" | "Pending" | "Completed" | "Failed/Rejected"
+    "All" | "Initiated" | "Pending" | "Completed" | "Failed"
   >("All");
   const [searchValue, setSearchValue] = useState<string>("");
   const [showSignPopup, setShowSignPopup] = useState({ show: false, message: "success", primaryButtonText: "", secondaryButtonText:"",  showSignBtn: true, heading : "", isPending: false});
@@ -77,7 +77,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
           item.status === "FAILED" &&
           item.file_name.toLowerCase().includes(searchValue.toLowerCase())
       ).length,
-      status: "Failed/Rejected",
+      status: "Failed",
     },
   ];
 
@@ -116,6 +116,8 @@ export const Documents = ({ documents }: DocumentsProps) => {
   };
 
   const filteredDocuments = documents.filter((item) => {
+    console.log(item);
+    console.log(selectedStatusOption);
     const matchesStatus =
       selectedStatusOption === "All" ? true : item.status === selectedStatusOption.toUpperCase();
 
@@ -297,7 +299,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                 key={item.status}
                 onClick={() =>
                   setSelectedStatusOption(
-                    item.status as "All" | "Initiated" | "Pending" | "Completed" | "Failed/Rejected"
+                    item.status as "All" | "Initiated" | "Pending" | "Completed" | "Failed"
                   )
                 }
                 className={`px-[14px] rounded-[100px] py-[6px] flex gap-[6px] items-center ${
@@ -311,7 +313,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                     item.status === selectedStatusOption && "font-bold text-white opacity-100"
                   }`}
                 >
-                  {item.status}
+                  {item.status==="Failed"? "Failed/Rejected": item.status}
                 </p>
                 {item.status === selectedStatusOption && (
                   <div className="px-2 py-[2px] text-xs leading-3 font-bold flex items-center bg-white rounded-[100px]">
