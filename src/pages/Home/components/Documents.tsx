@@ -269,7 +269,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
               borderRadius={"100px"}
             />
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <div className="text-2xl font-bold">
                 Assigned Requests
               </div>

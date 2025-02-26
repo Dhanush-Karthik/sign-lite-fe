@@ -2,11 +2,12 @@ import PendingSVG from "@/assets/StatusLogos/pending.svg";
 import DraftSVG from "@/assets/StatusLogos/draft.svg";
 import CompletedSVG from "@/assets/StatusLogos/completed.svg";
 import FailedSVG from "@/assets/StatusLogos/failed.svg";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { useAppSelector } from "@/core/redux/store";
 import { f7, SkeletonBlock } from "framework7-react";
 import { Skeleton } from "@/components/Skeleton";
 import NoDocs from "@/assets/components/NoDocs";
+import SearchIcon from "@/assets/searchIcon.svg";
 
 interface ExecutionError {
   taskName: string;
@@ -43,7 +44,17 @@ const Home = ({ documents }: HomeProps) => {
   const user = useAppSelector((state) => state.auth.user);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   const loading = useAppSelector((state) => state.loading.models.doc);
+  const [searchValue, setSearchValue] = useState<string>("");
+
+
+  const [selectedStatusOption, setSelectedStatusOption] = useState<
+      "All" | "Initiated" | "Pending" | "Completed" | "Failed"
+    >("All");
   const StatusMock = [
+    {
+      count: documents.length,
+      status: "All",
+    },
     {
       count: documents.filter((item) => item.status === "ENDED")
         .length,
@@ -59,15 +70,51 @@ const Home = ({ documents }: HomeProps) => {
     }
   ];
 
+  const filteredDocuments = documents.filter((item) => {
+    const matchesStatus =
+      selectedStatusOption === "All" ? true : item.status === selectedStatusOption.toUpperCase();
+
+    const matchesSearch = searchValue
+      ? item.fileName.toLowerCase().includes(searchValue.toLowerCase())
+      : true;
+
+    return matchesStatus && matchesSearch;
+  });
+
+  const groupByDate = (items: DocumentType[]) => {
+    const grouped: {
+      [key: string]: DocumentType[];
+    } = {};
+
+    items.forEach((item) => {
+      const date = new Date();  // You might want to add createdAt to your document type
+      const key = date.toDateString();
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(item);
+    });
+
+    return grouped;
+  };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  };
+
+  const groupedData = groupByDate(filteredDocuments);
+
   return (
     <>
       <section title="top">
-        <h1 className="text-primaryTextColor text-xl leading-[26px] font-bold pt-[25px] pb-[5px] px-4">{`Hello ${
+        {/* <h1 className="text-primaryTextColor text-xl leading-[26px] font-bold pt-[25px] pb-[5px] px-4">{`Hello ${
           user?.name ?? "User"
-        },`}</h1>
+        },`}</h1> */}
+        <div className="text-2xl font-bold pt-6 pl-4">Requested Documents</div>
         <div className="flex gap-[14px] p-4">
-          {StatusMock.map((item) => (
-            <div
+          {StatusMock.map((item) => {
+            if(item.status==="All") return;
+            return (<div
               className="p-3 bg-white w-[calc((100%-28px)/3)] h-[72px] rounded-[14px]"
               key={item.status}
             >
@@ -96,8 +143,21 @@ const Home = ({ documents }: HomeProps) => {
                 />
               </div>
               <p className="text-[12px]">{item.status}</p>
-            </div>
-          ))}
+            </div> 
+          )
+          })}
+        </div>
+        <div className="relative px-4 mb-3">
+          <img
+            className="absolute inset-y-0 left-4 top-[10px] flex items-center pl-3"
+            src={SearchIcon}
+          />
+          <input
+            type="search"
+            onChange={handleSearch}
+            placeholder="Search document here..."
+            className="!bg-white !rounded-[999px] !p-[10px] !pl-10 !w-full !border-none"
+          />
         </div>
       </section>
       <section
@@ -108,6 +168,50 @@ const Home = ({ documents }: HomeProps) => {
         }}
       >
         {/* <p className="mb-6 font-bold leading-[26px] text-xl">Recent activity</p> */}
+        <div className="w-full overflow-x-auto">
+          <div className="flex gap-2 mb-5 whitespace-nowrap">
+            {StatusMock.map((item) =>
+              loading ? (
+                <SkeletonBlock
+                  key={item.status}
+                  slot="media"
+                  tag={"a"}
+                  width={"80px"}
+                  height={"32px"}
+                  effect={"wave"}
+                  borderRadius={"100px"}
+                />
+              ) : (
+                <div
+                  key={item.status}
+                  onClick={() =>
+                    setSelectedStatusOption(
+                      item.status as "All" | "Initiated" | "Pending" | "Completed" | "Failed"
+                    )
+                  }
+                  className={`px-[14px] rounded-[100px] py-[6px] flex gap-[6px] items-center ${
+                    item.status === selectedStatusOption
+                      ? "bg-mainDarkBlue"
+                      : "border border-defaultBorder"
+                  }`}
+                >
+                  <p
+                    className={`text-sm text-mainDarkBlue opacity-60 ${
+                      item.status === selectedStatusOption && "font-bold text-white opacity-100"
+                    }`}
+                  >
+                    {item.status==="Failed"? "Failed/Rejected": item.status}
+                  </p>
+                  {item.status === selectedStatusOption && (
+                    <div className="px-2 py-[2px] text-xs leading-3 font-bold flex items-center bg-white rounded-[100px]">
+                      {item.count}
+                    </div>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+        </div>
         <div className="flex flex-col gap-3 items-end h-full overflow-scroll">
           {loading ? (
             <Skeleton />
@@ -128,7 +232,7 @@ const Home = ({ documents }: HomeProps) => {
                     }
                     }
                     className={`flex w-full gap-5 justify-between ${
-                      key === documents.length - 1 && "mb-[50px]"
+                      key === documents.length - 1 && "mb-[150px]"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -167,7 +271,13 @@ const Home = ({ documents }: HomeProps) => {
                         </p>
                         <div className="flex-col gap-3 items-center">
                           <div className="text-[#63788E] mb-2 text-xs leading-normal">
-                          from {item.activities[0].taskAssignee}
+                          {item.status
+                          ? {
+                              ABORTED: "Signature request is rejected",
+                              ACTIVE: `Current signer - ${item.activities[0].taskAssignee}`,
+                              ENDED: `Document is signed by all assigners`,
+                            }[item.status]
+                          : `from ${item.activities[0].taskAssignee}`}
                           </div>
                           <div className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] ">
                           {item.status
