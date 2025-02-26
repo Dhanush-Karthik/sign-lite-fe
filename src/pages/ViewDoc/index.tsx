@@ -47,22 +47,35 @@ interface Activity {
 
 export const ViewDoc = ({ f7router, item, requestedItem }: { f7router: Router.Router; item: AssignedDocumentType; requestedItem: RequestedDocumentType }) => {
   const [pageCounts, setPageCounts] = useState(1);
-  const [pdf, setPdf] = useState<string>();
+  const [pdfUrl, setPdfUrl] = useState<string>("");
   const dispatch = useAppDispatch();
 
   const onDocumentLoadSuccess = (pdf: any) => setPageCounts(pdf._pdfInfo.numPages);
 
   const getDoc = async () => {
-    // const response = 
-      await dispatch.doc.getDoc({ email: item?.requester??requestedItem?.activities[0].taskAssignee , process_instance_id: item?.process_instance_id??requestedItem?.flowInstanceId });
-    // const blob = new Blob([response], { type: "application/pdf" });
-    // const pdfUrl = URL.createObjectURL(blob);
-    
-    setPdf("response");
+    try {
+      const response = await dispatch.doc.getDoc(
+        {
+          email: item?.requester ?? requestedItem?.activities[0]?.taskAssignee,
+          process_instance_id: item?.process_instance_id ?? requestedItem?.flowInstanceId,
+        }
+      );
+
+      if (response) {
+        setPdfUrl(response);
+      }
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+    }
   };
 
   useEffect(() => {
     getDoc();
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
   }, []);
 
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
@@ -76,13 +89,13 @@ export const ViewDoc = ({ f7router, item, requestedItem }: { f7router: Router.Ro
         }}
       >
         <div className="flex-1 overflow-y-auto">
-          {!pdf ? (
+          {!pdfUrl ? (
             <>
               <p>Loading PDF...</p>
-              <p>View PDF is currently unavailable</p>
+              {/* <p>View PDF is currently unavailable</p> */}
             </>
           ) : (
-            <Document file={pdf} loading="Loading PDF..." onLoadSuccess={onDocumentLoadSuccess}>
+            <Document file={pdfUrl} loading="Loading PDF..." onLoadSuccess={onDocumentLoadSuccess}>
               {Array.from({ length: pageCounts }, (_, i) => i + 1).map((num) => (
                 <PdfPage
                   pageNumber={num}

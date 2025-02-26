@@ -1,7 +1,8 @@
 import { createModel } from "@rematch/core";
 import { RootModel } from "../store";
 import { miniappClient } from "@/core/miniappClient";
-import { API_PATHS } from "@/constants";
+import { API_BASE_URL, API_PATHS } from "@/constants";
+import axios from "axios";
 
 type SendDocState = {
   signatureFile?: File;
@@ -57,10 +58,16 @@ const docs = createModel<RootModel>()({
   },
   effects: () => ({
     async getDoc({ email, process_instance_id }: { email: string, process_instance_id: string }) {
-      const url = `${API_PATHS.GET_DOCUMENT}`.replace("email", email).replace("flowInstanceId", process_instance_id);
-      const response = await miniappClient.get(url);
-      console.log(response);
-      return response.toString();
+      const url = `${API_BASE_URL}${API_PATHS.GET_DOCUMENT}`.replace("email", email).replace("flowInstanceId", process_instance_id);
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        url,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob",
+        }
+      );
+      return response.data;
     },
 
     async getAllDocs({ email }: { email: string }) {
