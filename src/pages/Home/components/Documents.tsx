@@ -147,10 +147,34 @@ export const Documents = ({ documents }: DocumentsProps) => {
     setSearchValue(e.target.value);
   };
 
-  const handleSignDocument = async (isPending: boolean) => {
+  const handleSignDocument = async (isPending: boolean, primaryButtonText : string) => {
     if (!selectedDocument) return;
 
     if(isPending) {
+      if (primaryButtonText === "Yes, Cancel") {
+        try {
+          setIsLoading(true);
+          const url = `${API_PATHS.PUSH_DOC_TO_CHAT}`.replace("email", selectedDocument!.signer_id) + "?reject=true";
+          console.log(url);
+          await miniappClient.post(
+            url,
+            JSON.stringify({
+              processInstanceId: selectedDocument!.process_instance_id,
+              taskId: selectedDocument!.task_id,
+              userId: selectedDocument!.signer_id,
+              documentName: selectedDocument!.file_name,
+            })
+          );
+    
+          setShowSignPopup({ show: true, message: "The signature request is rejected successfully", primaryButtonText:"", secondaryButtonText: "Close", showSignBtn: false, heading: "Request rejected", isPending: false});
+        } catch (error) {
+          setShowSignPopup({ show: true, message: "Oops, Something went wrong!", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "", isPending: false});
+        } finally {
+          setIsLoading(false);
+        }
+
+        return;
+      }
       window.location.replace(SECURE_CHAT_SHARE_URL);
       return;
     }
@@ -181,32 +205,19 @@ export const Documents = ({ documents }: DocumentsProps) => {
     }
   };
 
-  const handleSecondaryButtonClick = async (selectedDocument: DocumentType | null, isReject: boolean) => {
-    if(!isReject) {
+  const handleSecondaryButtonClick = async (isReject: boolean, heading: string) => {
+    if(heading==="Request rejected") {
+      window.location.reload();
+      return;
+    }
+
+    if(!isReject || heading === "Cancel Request") {
       setShowSignPopup({show: false, message: "", primaryButtonText: "", secondaryButtonText: "", showSignBtn: false, heading: "", isPending: false});
       return;
     }
 
-    try {
-      setIsLoading(true);
-      const url = `${API_PATHS.PUSH_DOC_TO_CHAT}`.replace("email", selectedDocument!.signer_id) + "?reject=true";
-      console.log(url);
-      await miniappClient.post(
-        url,
-        JSON.stringify({
-          processInstanceId: selectedDocument!.process_instance_id,
-          taskId: selectedDocument!.task_id,
-          userId: selectedDocument!.signer_id,
-          documentName: selectedDocument!.file_name,
-        })
-      );
-
-      setShowSignPopup({ show: true, message: "The signature request is rejected successfully", primaryButtonText:"", secondaryButtonText: "Close", showSignBtn: false, heading: "Request rejected", isPending: false});
-    } catch (error) {
-      setShowSignPopup({ show: true, message: "Oops, Something went wrong!", primaryButtonText:"Yes, Sign", secondaryButtonText: "Close", showSignBtn: false, heading: "", isPending: false});
-    } finally {
-      setIsLoading(false);
-    }
+    setShowSignPopup({show: true, message: "Are you sure you want to cancel the signature request?", primaryButtonText: "Yes, Cancel", secondaryButtonText: "Close", showSignBtn: true, heading: "Cancel Request", isPending: true});
+    return;
   };
 
   const getStatusIcon = (status: string) => {
@@ -247,7 +258,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         </div>
       }
       <section title="top">
-        <div className="pt-[13px] pb-[13px] mt-7 mb-4 h-14 px-4">
+        <div className="mb-3 pt-7 px-4">
           {loading ? (
             <SkeletonBlock
               slot="media"
@@ -258,17 +269,22 @@ export const Documents = ({ documents }: DocumentsProps) => {
               borderRadius={"100px"}
             />
           ) : (
-            <div className="relative w-[calc(100%-100px)]">
-              <img
-                className="absolute inset-y-0 left-0 top-[10px] flex items-center pl-3"
-                src={SearchIcon}
-              />
-              <input
-                type="search"
-                onChange={handleSearch}
-                placeholder="Search document here..."
-                className="!bg-white !rounded-[999px] !p-[10px] !pl-10 !w-full !border-none"
-              />
+            <div className="flex flex-col gap-2">
+              <div className="text-2xl font-bold">
+                Assigned Requests
+              </div>
+              <div className="relative ">
+                <img
+                  className="absolute inset-y-0 left-0 top-[10px] flex items-center pl-3"
+                  src={SearchIcon}
+                />
+                <input
+                  type="search"
+                  onChange={handleSearch}
+                  placeholder="Search document here..."
+                  className="!bg-white !rounded-[999px] !p-[10px] !pl-10 !w-full !border-none"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -281,7 +297,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         }}
       >
         <div className="w-full overflow-x-auto">
-        <div className="flex gap-2 mb-6 whitespace-nowrap">
+        <div className="flex gap-2 mb-2 whitespace-nowrap">
           {StatusMock.map((item) =>
             loading ? (
               <SkeletonBlock
@@ -327,7 +343,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         {loading ? (
           <Skeleton documentPage />
         ) : documents.length ? (
-          <div className="flex flex-col items-end flex-1 overflow-scroll">
+          <div className="flex flex-col items-end flex-1 overflow-scroll mb-[75px]">
             {Object.keys(groupedData)
               .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
               .map((key, index) => (
@@ -453,15 +469,15 @@ export const Documents = ({ documents }: DocumentsProps) => {
           <div className="flex justify-center gap-4 mt-6">
             {showSignPopup.showSignBtn && (
               <button
-                onClick={() => handleSignDocument(showSignPopup.isPending)}
+                onClick={() => handleSignDocument(showSignPopup.isPending, showSignPopup.primaryButtonText)}
                 className="px-4 py-2 bg-[#1D56EE] text-white rounded-lg transition duration-200 hover:bg-[#1540B2] active:bg-[#12369B]"
               >
                 {showSignPopup.primaryButtonText}
               </button>
             )}
             <button
-              onClick={() => handleSecondaryButtonClick(selectedDocument, showSignPopup.isPending)}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg transition duration-200 hover:bg-gray-200 active:bg-gray-300"
+              onClick={() => handleSecondaryButtonClick(showSignPopup.isPending, showSignPopup.heading)}
+              className={`px-4 py-2 text-gray-600 border border-gray-300 rounded-lg transition duration-200 ${showSignPopup.isPending && showSignPopup.heading !== "Cancel Request" && "bg-[#D32F2F] border-none text-white"}`}
             >
               {showSignPopup.secondaryButtonText}
             </button>

@@ -62,7 +62,7 @@ const Home = ({ documents }: HomeProps) => {
   return (
     <>
       <section title="top">
-        <h1 className="text-primaryTextColor text-xl leading-[26px] font-bold pt-[10px] pb-[20px] px-4">{`Hello ${
+        <h1 className="text-primaryTextColor text-xl leading-[26px] font-bold pt-[25px] pb-[5px] px-4">{`Hello ${
           user?.name ?? "User"
         },`}</h1>
         <div className="flex gap-[14px] p-4">
@@ -128,7 +128,7 @@ const Home = ({ documents }: HomeProps) => {
                     }
                     }
                     className={`flex w-full gap-5 justify-between ${
-                      key === documents.length - 1 && "mb-[100px]"
+                      key === documents.length - 1 && "mb-[50px]"
                     }`}
                   >
                     <div className="flex items-center gap-3">
