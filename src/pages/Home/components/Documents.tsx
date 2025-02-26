@@ -247,7 +247,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         </div>
       }
       <section title="top">
-        <div className="pt-[13px] pb-[13px] mb-3 h-14 px-4">
+        <div className="pt-[13px] pb-[13px] mt-7 mb-4 h-14 px-4">
           {loading ? (
             <SkeletonBlock
               slot="media"
