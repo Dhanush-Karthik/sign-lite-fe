@@ -41,14 +41,13 @@ interface HomeProps {
 
 
 const Home = ({ documents }: HomeProps) => {
-  const user = useAppSelector((state) => state.auth.user);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   const loading = useAppSelector((state) => state.loading.models.doc);
   const [searchValue, setSearchValue] = useState<string>("");
 
 
   const [selectedStatusOption, setSelectedStatusOption] = useState<
-      "All" | "Initiated" | "Pending" | "Completed" | "Failed"
+      "All" | "Pending" | "Completed" | "Rejected"
     >("All");
   const StatusMock = [
     {
@@ -70,12 +69,25 @@ const Home = ({ documents }: HomeProps) => {
     }
   ];
 
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "ABORTED":
+        return "Rejected"
+      case "ACTIVE":
+        return "Pending"
+      case "ENDED":
+        return "Completed"
+    }
+  }
+
   const filteredDocuments = documents.filter((item) => {
+    
+    const status = getStatus(item.status);
     const matchesStatus =
-      selectedStatusOption === "All" ? true : item.status === selectedStatusOption.toUpperCase();
+      selectedStatusOption === "All" ? true : status === selectedStatusOption;
 
     const matchesSearch = searchValue
-      ? item.fileName.toLowerCase().includes(searchValue.toLowerCase())
+      ? item.fileName?.toLowerCase().includes(searchValue.toLowerCase())
       : true;
 
     return matchesStatus && matchesSearch;
@@ -186,7 +198,7 @@ const Home = ({ documents }: HomeProps) => {
                   key={item.status}
                   onClick={() =>
                     setSelectedStatusOption(
-                      item.status as "All" | "Initiated" | "Pending" | "Completed" | "Failed"
+                      item.status as "All" | "Pending" | "Completed" | "Rejected"
                     )
                   }
                   className={`px-[14px] rounded-[100px] py-[6px] flex gap-[6px] items-center ${
@@ -215,104 +227,102 @@ const Home = ({ documents }: HomeProps) => {
         <div className="flex flex-col gap-3 items-end h-full overflow-scroll">
           {loading ? (
             <Skeleton />
-          ) : documents.length ? (
-            documents
-              .sort(
-                (a, b) =>
-                  new Date(b.startTime).getTime() -
-                  new Date(a.startTime).getTime()
-              )
-              .map((item, key) => (
-                <Fragment key={key}>
-                  <div
-                    onClick={async () => {
-                      f7.views.main.router.navigate("/details/viewdoc", {
-                        props: { requestedItem: item },
-                      })
-                    }
-                    }
-                    className={`flex w-full gap-5 justify-between ${
-                      key === documents.length - 1 && "mb-[150px]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`p-3 rounded-xl w-[44px] h-[44px] flex justify-center items-center ${
-                          item.status
-                            ? {
-                                ABORTED: "bg-[#EF4B341F]",
-                                ACTIVE: "bg-[#FEF3C7]",
-                                ENDED: "bg-[#54BE8C1F]",
-                              }[item.status]
-                            // : item.isSigned
-                            // ? "bg-[#54BE8C1F]"
-                            : "bg-[#EF4B341F]"
-                        }`}
-                      >
-                        <img
-                          src={
+          ) : Object.keys(groupedData).length ? (
+            Object.keys(groupedData)
+              .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+              .map((key) => (
+                groupedData[key].map((item, index2) => (
+                  <Fragment key={index2}>
+                    <div
+                      onClick={async () => {
+                        f7.views.main.router.navigate("/details/viewdoc", {
+                          props: { requestedItem: item },
+                        })
+                      }
+                      }
+                      className={`flex w-full gap-5 justify-between ${
+                        index2 === documents.length - 1 && "mb-[150px]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`p-3 rounded-xl w-[44px] h-[44px] flex justify-center items-center ${
                             item.status
                               ? {
-                                  ABORTED: FailedSVG,
-                                  ACTIVE: PendingSVG,
-                                  ENDED: CompletedSVG,
+                                  ABORTED: "bg-[#EF4B341F]",
+                                  ACTIVE: "bg-[#FEF3C7]",
+                                  ENDED: "bg-[#54BE8C1F]",
                                 }[item.status]
                               // : item.isSigned
-                              // ? CompletedSVG
-                              : PendingSVG
-                          }
-                          className="max-w-6"
-                        />
-                      </div>
+                              // ? "bg-[#54BE8C1F]"
+                              : "bg-[#EF4B341F]"
+                          }`}
+                        >
+                          <img
+                            src={
+                              item.status
+                                ? {
+                                    ABORTED: FailedSVG,
+                                    ACTIVE: PendingSVG,
+                                    ENDED: CompletedSVG,
+                                  }[item.status]
+                                // : item.isSigned
+                                // ? CompletedSVG
+                                : PendingSVG
+                            }
+                            className="max-w-6"
+                          />
+                        </div>
 
-                      <div className="w-full text-mainDarkBlue overflow-hidden">
-                        <p className="font-medium text-sm whitespace-nowrap text-ellipsis overflow-hidden">
-                          {item.fileName??"Document.pdf"}
-                        </p>
-                        <div className="flex-col gap-3 items-center">
-                          <div className="text-[#63788E] mb-2 text-xs leading-normal">
-                          {item.status
-                          ? {
-                              ABORTED: "Signature request is rejected",
-                              ACTIVE: `Current signer - ${item.activities[0].taskAssignee}`,
-                              ENDED: `Document is signed by all assigners`,
-                            }[item.status]
-                          : `from ${item.activities[0].taskAssignee}`}
-                          </div>
-                          <div className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] ">
-                          {item.status
-                          ? {
-                              ABORTED: "Failed/Rejected",
-                              ACTIVE: "Pending",
-                              ENDED: `Completed`,
-                            }[item.status]
-                          // : item.isSigned
-                          // ? "Signed by You"
-                          : "Need to sign"}
+                        <div className="w-full text-mainDarkBlue overflow-hidden">
+                          <p className="font-medium text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+                            {item.fileName??"Document.pdf"}
+                          </p>
+                          <div className="flex-col gap-3 items-center">
+                            <div className="text-[#63788E] mb-2 text-xs leading-normal">
+                            {item.status
+                            ? {
+                                ABORTED: "Signature request is rejected",
+                                ACTIVE: `Current signer - ${item.activities[0].taskAssignee}`,
+                                ENDED: `Document is signed by all assigners`,
+                              }[item.status]
+                            : `from ${item.activities[0].taskAssignee}`}
+                            </div>
+                            <div className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] ">
+                            {item.status
+                            ? {
+                                ABORTED: "Failed/Rejected",
+                                ACTIVE: "Pending",
+                                ENDED: `Completed`,
+                              }[item.status]
+                            // : item.isSigned
+                            // ? "Signed by You"
+                            : "Need to sign"}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex flex-col items-center justify-center">
-                      <p className="text-gray text-xs">
-                        {new Date(item.startTime).toLocaleTimeString(
-                          "en-US",
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          }
-                        )}
-                      </p>
+                      <div className="flex flex-col items-center justify-center">
+                        <p className="text-gray text-xs">
+                          {new Date(item.startTime).toLocaleTimeString(
+                            "en-US",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            }
+                          )}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className={`w-[calc(100%-52px)] border-b border-[#E6E8EA] ${
-                      key === documents.length - 1 && "hidden"
-                    }`}
-                  />
-                </Fragment>
+                    <div
+                      className={`w-[calc(100%-52px)] border-b border-[#E6E8EA] ${
+                        index2 === documents.length - 1 && "hidden"
+                      }`}
+                    />
+                  </Fragment>
+                ))
               ))
           ) : (
             <div className="flex flex-col items-center gap-10 mt-[5rem]">
