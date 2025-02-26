@@ -1,35 +1,62 @@
 import PendingSVG from "@/assets/StatusLogos/pending.svg";
 import DraftSVG from "@/assets/StatusLogos/draft.svg";
 import CompletedSVG from "@/assets/StatusLogos/completed.svg";
-import MoreIcon from "@/assets/moreIcon.svg";
+import FailedSVG from "@/assets/StatusLogos/failed.svg";
 import { Fragment } from "react";
 import { useAppSelector } from "@/core/redux/store";
 import { f7, SkeletonBlock } from "framework7-react";
-import { DocType } from "@/types";
 import { Skeleton } from "@/components/Skeleton";
 import NoDocs from "@/assets/components/NoDocs";
 
-interface HomeProps {
-  documents: DocType[];
+interface ExecutionError {
+  taskName: string;
+  taskAssignee: string;
+  error: string;
 }
+
+interface Activity {
+  taskName: string;
+  taskAssignee: string;
+  executionDuration: string;
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  status: "Ended" | "Active";
+}
+
+interface DocumentType {
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  flowInstanceId: string;
+  fileName:string;
+  flowName: string;
+  status: "ABORTED" | "ENDED" | "ACTIVE";
+  executionError?: ExecutionError; // Optional because not all documents have this field
+  activities: Activity[];
+}
+
+interface HomeProps {
+  documents: DocumentType[];
+}
+
+
 const Home = ({ documents }: HomeProps) => {
   const user = useAppSelector((state) => state.auth.user);
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
   const loading = useAppSelector((state) => state.loading.models.doc);
   const StatusMock = [
     {
-      count: documents.filter((doc) => doc.status === "DRAFT").length,
-      status: "Draft",
+      count: documents.filter((item) => item.status === "ENDED")
+        .length,
+      status: "Completed",
     },
     {
-      count: documents.filter((item) => item.status === "PENDING" || item.isSigned === false)
-        .length,
+      count: documents.filter((item) => item.status === "ACTIVE").length,
       status: "Pending",
     },
     {
-      count: documents.filter((item) => item.status === "COMPLETED" || item.isSigned).length,
-      status: "Completed",
-    },
+      count: documents.filter((doc) => doc.status === "ABORTED").length,
+      status: "Rejected",
+    }
   ];
 
   return (
@@ -44,7 +71,7 @@ const Home = ({ documents }: HomeProps) => {
               className="p-3 bg-white w-[calc((100%-28px)/3)] h-[72px] rounded-[14px]"
               key={item.status}
             >
-              <div className="flex justify-between mb-3 h-6 hidden">
+              <div className="flex justify-between mb-3 h-6">
                 {loading ? (
                   <SkeletonBlock
                     slot="media"
@@ -63,11 +90,12 @@ const Home = ({ documents }: HomeProps) => {
                       Draft: DraftSVG,
                       Pending: PendingSVG,
                       Completed: CompletedSVG,
+                      Rejected: FailedSVG
                     }[item.status]
                   }
                 />
               </div>
-              <p className="text-[12px] hidden">{item.status}</p>
+              <p className="text-[12px]">{item.status}</p>
             </div>
           ))}
         </div>
@@ -80,39 +108,40 @@ const Home = ({ documents }: HomeProps) => {
         }}
       >
         {/* <p className="mb-6 font-bold leading-[26px] text-xl">Recent activity</p> */}
-        <div className="flex flex-col gap-5 items-end h-full overflow-scroll hidden">
+        <div className="flex flex-col gap-3 items-end h-full overflow-scroll">
           {loading ? (
             <Skeleton />
           ) : documents.length ? (
             documents
               .sort(
                 (a, b) =>
-                  new Date(b.status ? b.createdAt : b.document.createdAt).getTime() -
-                  new Date(a.status ? a.createdAt : a.document.createdAt).getTime()
+                  new Date(b.startTime).getTime() -
+                  new Date(a.startTime).getTime()
               )
               .map((item, key) => (
                 <Fragment key={key}>
                   <div
-                    onClick={() =>
-                      f7.views.main.router.navigate("/details", {
-                        props: { item },
+                    onClick={async () => {
+                      f7.views.main.router.navigate("/details/viewdoc", {
+                        props: { requestedItem: item },
                       })
+                    }
                     }
                     className={`flex w-full gap-5 justify-between ${
                       key === documents.length - 1 && "mb-[100px]"
                     }`}
                   >
-                    <div className="flex w-[calc(100%-50px)] gap-3">
+                    <div className="flex items-center gap-3">
                       <div
                         className={`p-3 rounded-xl w-[44px] h-[44px] flex justify-center items-center ${
                           item.status
                             ? {
-                                DRAFT: "bg-[#e4eafe]",
-                                PENDING: "bg-[#EF4B341F]",
-                                COMPLETED: "bg-[#54BE8C1F]",
+                                ABORTED: "bg-[#EF4B341F]",
+                                ACTIVE: "bg-[#FEF3C7]",
+                                ENDED: "bg-[#54BE8C1F]",
                               }[item.status]
-                            : item.isSigned
-                            ? "bg-[#54BE8C1F]"
+                            // : item.isSigned
+                            // ? "bg-[#54BE8C1F]"
                             : "bg-[#EF4B341F]"
                         }`}
                       >
@@ -120,12 +149,12 @@ const Home = ({ documents }: HomeProps) => {
                           src={
                             item.status
                               ? {
-                                  DRAFT: DraftSVG,
-                                  PENDING: PendingSVG,
-                                  COMPLETED: CompletedSVG,
+                                  ABORTED: FailedSVG,
+                                  ACTIVE: PendingSVG,
+                                  ENDED: CompletedSVG,
                                 }[item.status]
-                              : item.isSigned
-                              ? CompletedSVG
+                              // : item.isSigned
+                              // ? CompletedSVG
                               : PendingSVG
                           }
                           className="max-w-6"
@@ -133,45 +162,31 @@ const Home = ({ documents }: HomeProps) => {
                       </div>
 
                       <div className="w-full text-mainDarkBlue overflow-hidden">
-                        <p className="mb-2 font-medium text-sm whitespace-nowrap text-ellipsis overflow-hidden">
-                          {item.file_original_name ?? item.document.file_original_name}
+                        <p className="font-medium text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+                          {item.fileName??"Document.pdf"}
                         </p>
-                        <div className="flex gap-2 items-center">
-                          <p className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] leading-3">
-                            {item.status
-                              ? {
-                                  DRAFT: "Draft",
-                                  PENDING: "Waiting others to sign",
-                                  COMPLETED: `Signed by ${item.signers[0].name}`,
-                                }[item.status]
-                              : item.isSigned
-                              ? "Signed by You"
-                              : "Need to sign"}
-                          </p>
-                          {item.status === "PENDING" && (
-                            <>
-                              <div className="w-[3px] h-[3px] bg-[#BBBBC3]" />
-                              <p className="text-[#63788E] text-xs leading-normal">
-                                from {item.signers[0].name}
-                              </p>
-                            </>
-                          )}
-                          {!item.isSigned && item.document && (
-                            <>
-                              <div className="w-[3px] h-[3px] bg-[#BBBBC3]" />
-                              <p className="text-[#63788E] text-xs leading-normal">
-                                from {item.document?.uploadedBy?.name}
-                              </p>
-                            </>
-                          )}
+                        <div className="flex-col gap-3 items-center">
+                          <div className="text-[#63788E] mb-2 text-xs leading-normal">
+                          from {item.activities[0].taskAssignee}
+                          </div>
+                          <div className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] ">
+                          {item.status
+                          ? {
+                              ABORTED: "Failed/Rejected",
+                              ACTIVE: "Pending",
+                              ENDED: `Completed`,
+                            }[item.status]
+                          // : item.isSigned
+                          // ? "Signed by You"
+                          : "Need to sign"}
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2">
-                      <img src={MoreIcon} />
+                    <div className="flex flex-col items-center justify-center">
                       <p className="text-gray text-xs">
-                        {new Date(item.createdAt ?? item.document.createdAt).toLocaleTimeString(
+                        {new Date(item.startTime).toLocaleTimeString(
                           "en-US",
                           {
                             hour: "2-digit",

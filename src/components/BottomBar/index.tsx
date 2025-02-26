@@ -17,7 +17,7 @@ const BottomBar = ({ open, setCurrentTab, currentTab }: BottomBarProps) => {
           className="w-full flex flex-col items-center gap-2"
         >
           <HomeIcon selected={currentTab === "home"} />
-          <p className="text-mainDarkBlue text-[11px] font-bold leading-3">Home</p>
+          <p className="text-mainDarkBlue text-[11px] font-bold leading-3">Requested</p>
         </div>
       </div>
       <div className=" py-[10px] px-1">
@@ -36,7 +36,7 @@ const BottomBar = ({ open, setCurrentTab, currentTab }: BottomBarProps) => {
           className="w-full flex flex-col items-center gap-2"
         >
           <DocumentsIcon stroke="#63788E" selected={currentTab === "documents"} />
-          <p className="text-[#63788E] text-[11px] font-bold leading-3">Documents</p>
+          <p className="text-[#63788E] text-[11px] font-bold leading-3">Assigned</p>
         </div>
       </div>
     </section>

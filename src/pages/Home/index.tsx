@@ -5,15 +5,50 @@ import { Documents } from "./components/Documents";
 import { AddDocumentModal } from "./components/AddDocumentModal";
 import { useDisclosure } from "@/core/hooks/useDisclosure";
 import MyPage from "@/components/MyPage";
-import { DocType } from "@/types";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
+
+interface ExecutionError {
+  taskName: string;
+  taskAssignee: string;
+  error: string;
+}
+
+interface Activity {
+  taskName: string;
+  taskAssignee: string;
+  executionDuration: string;
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  status: "Ended" | "Active";
+}
+
+interface DocumentType {
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  flowInstanceId: string;
+  fileName:string;
+  flowName: string;
+  status: "ABORTED" | "ENDED" | "ACTIVE";
+  executionError?: ExecutionError; // Optional because not all documents have this field
+  activities: Activity[];
+}
+
+interface AssignedDocumentType {
+  id: string;
+  signer_id: string;
+  process_instance_id: string;
+  requester: string;
+  file_name: string;
+  task_id: string;
+  status: "INITIATED" | "PENDING" | "COMPLETED" | "FAILED" | "DRAFT";
+}
 
 const MainPage = () => {
   const { close, isOpen, open } = useDisclosure();
   const email = useAppSelector((state) => state.auth.user?.email);
   const [currentTab, setCurrentTab] = useState<"home" | "documents">("home");
-  const [documents, setDocuments] = useState<DocType[]>([]);
-  const [newDocuments, setNewDocuments] = useState<DocType[]>([]);
+  const [documents, setDocuments] = useState<DocumentType[]>([]);
+  const [newDocuments, setNewDocuments] = useState<AssignedDocumentType[]>([]);
   const dispatch = useAppDispatch();
 
   useEffect(() => {

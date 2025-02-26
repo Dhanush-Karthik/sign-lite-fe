@@ -2,7 +2,6 @@ import { createModel } from "@rematch/core";
 import { RootModel } from "../store";
 import { miniappClient } from "@/core/miniappClient";
 import { API_PATHS } from "@/constants";
-import { DocType } from "@/types";
 
 type SendDocState = {
   signatureFile?: File;
@@ -57,11 +56,17 @@ const docs = createModel<RootModel>()({
     },
   },
   effects: () => ({
+    async getDoc({ email, process_instance_id }: { email: string, process_instance_id: string }) {
+      const url = `${API_PATHS.GET_DOCUMENT}`.replace("email", email).replace("flowInstanceId", process_instance_id);
+      const response = await miniappClient.get(url);
+      console.log(response);
+      return response.toString();
+    },
+
     async getAllDocs({ email }: { email: string }) {
-      const response: DocType[] = await miniappClient.get(
-        `${API_PATHS.GET_ALL_DOCS}/?email=${email}`
-      );
-      return response;
+      const url = `${API_PATHS.GET_REQUESTED_DOCS}`.replace("email", email);
+      const response = await miniappClient.get(url);
+      return response.data;
     },
 
     async getAllSignerDocs({ email }: { email: string }) {

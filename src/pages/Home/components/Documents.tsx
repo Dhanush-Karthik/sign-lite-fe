@@ -19,6 +19,7 @@ interface DocumentType {
   id: string;
   signer_id: string;
   process_instance_id: string;
+  requester: string;
   file_name: string;
   task_id: string;
   status: "INITIATED" | "PENDING" | "COMPLETED" | "FAILED" | "DRAFT";
@@ -116,8 +117,6 @@ export const Documents = ({ documents }: DocumentsProps) => {
   };
 
   const filteredDocuments = documents.filter((item) => {
-    console.log(item);
-    console.log(selectedStatusOption);
     const matchesStatus =
       selectedStatusOption === "All" ? true : item.status === selectedStatusOption.toUpperCase();
 
@@ -220,7 +219,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
       case "PENDING":
         return {
           icon: PendingSVG,
-          bgColor: "bg-[#EF4B341F]"
+          bgColor: "bg-[#FEF3C7]"
         };
       case "COMPLETED":
         return {
@@ -248,7 +247,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         </div>
       }
       <section title="top">
-        <div className="pt-[3px] pb-[13px] h-14 px-4">
+        <div className="pt-[13px] pb-[13px] mb-3 h-14 px-4">
           {loading ? (
             <SkeletonBlock
               slot="media"
@@ -339,7 +338,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                   {groupedData[key].map((item, index2) => (
                     <Fragment key={index2}>
                       <div
-                        onClick={() => {
+                        onClick={async () => {
                           f7.views.main.router.navigate("/details/viewdoc", {
                             props: { item },
                           })
@@ -369,7 +368,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
                             </div>
                             <div className="flex-col gap-3 items-center">
                               <div className="text-[#63788E] mb-2 text-xs leading-normal">
-                                from {item.signer_id}
+                                from {item.requester??"User"}
                               </div>
                               <div className="py-[2px] px-2 bg-[#63788e1f] rounded-[100px] w-fit text-[12px] ">
                                 {item.status === "INITIATED"

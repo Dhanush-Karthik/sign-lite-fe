@@ -3,13 +3,49 @@ import Header from "@/components/Header";
 import MyPage from "@/components/MyPage";
 // import { API_BASE_URL, API_PATHS } from "@/constants";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
-import { DocType } from "@/types";
 import { Router } from "framework7/types";
 import { useEffect, useState } from "react";
 import { Document, pdfjs, Page as PdfPage } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-export const ViewDoc = ({ f7router, item }: { f7router: Router.Router; item: DocType }) => {
+
+interface AssignedDocumentType {
+  id: string;
+  signer_id: string;
+  process_instance_id: string;
+  requester: string;
+  file_name: string;
+  task_id: string;
+  status: "INITIATED" | "PENDING" | "COMPLETED" | "FAILED" | "DRAFT";
+}
+
+interface RequestedDocumentType {
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  flowInstanceId: string;
+  fileName:string;
+  flowName: string;
+  status: "ABORTED" | "ENDED" | "ACTIVE";
+  executionError?: ExecutionError; // Optional because not all documents have this field
+  activities: Activity[];
+}
+
+interface ExecutionError {
+  taskName: string;
+  taskAssignee: string;
+  error: string;
+}
+
+interface Activity {
+  taskName: string;
+  taskAssignee: string;
+  executionDuration: string;
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  status: "Ended" | "Active";
+}
+
+export const ViewDoc = ({ f7router, item, requestedItem }: { f7router: Router.Router; item: AssignedDocumentType; requestedItem: RequestedDocumentType }) => {
   const [pageCounts, setPageCounts] = useState(1);
   const [pdf, setPdf] = useState<string>();
   const dispatch = useAppDispatch();
@@ -17,16 +53,12 @@ export const ViewDoc = ({ f7router, item }: { f7router: Router.Router; item: Doc
   const onDocumentLoadSuccess = (pdf: any) => setPageCounts(pdf._pdfInfo.numPages);
 
   const getDoc = async () => {
-    const response = await dispatch.doc.getOneDoc(
-      item.status
-        ? item.status === "COMPLETED"
-          ? { mediaId: item.signers[0].mediaId! }
-          : { fileName: item.file_name }
-        : item.isSigned
-        ? { mediaId: item.mediaId! }
-        : { fileName: item.document.file_name }
-    );
-    setPdf(response);
+    // const response = 
+      await dispatch.doc.getDoc({ email: item?.requester??requestedItem?.activities[0].taskAssignee , process_instance_id: item?.process_instance_id??requestedItem?.flowInstanceId });
+    // const blob = new Blob([response], { type: "application/pdf" });
+    // const pdfUrl = URL.createObjectURL(blob);
+    
+    setPdf("response");
   };
 
   useEffect(() => {
