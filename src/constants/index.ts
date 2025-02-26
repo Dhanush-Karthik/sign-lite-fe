@@ -8,7 +8,9 @@ const API_PATHS = {
   GET_ONE_DOC_MEDIA: "/v1/chat/media",
   GET_ONE_DOC_FILE_NAME: "/v1/document",
   GET_ALL_DOCS: "/v1/document/list",
-  GET_ALL_SIGNER_DOCS: "/api/email/get-documents",
+  GET_REQUESTED_DOCS: "api/email/requester-documents",
+  GET_ALL_SIGNER_DOCS: "/api/email/assigned-documents",
+  GET_DOCUMENT: "/api/email/document/flowInstanceId",
   PUSH_DOC_TO_CHAT: "api/email/push-document",
 };
 
