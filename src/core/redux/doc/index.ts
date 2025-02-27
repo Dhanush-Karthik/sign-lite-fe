@@ -82,6 +82,19 @@ const docs = createModel<RootModel>()({
       return response.data;
     },
 
+    async getUserDetails({ email }: { email: string }) {
+      const url = `${API_PATHS.USER_INFO}`.replace("email", email);
+      const response = await miniappClient.get(url);
+      return response.data;
+    },
+
+    async revokeNectValidation({ email }: { email: string }) {
+      const url = `${API_PATHS.REVOKE_NECT_VALIDATION}`.replace("email", email);
+      const response = await miniappClient.delete(url);
+      console.log(response);
+      return response.status;
+    },
+
     async getOneDoc({ mediaId, fileName }: { mediaId?: string; fileName?: string }) {
       const response: Blob = await miniappClient.get(
         mediaId

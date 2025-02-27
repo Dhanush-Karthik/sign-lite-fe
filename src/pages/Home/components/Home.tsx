@@ -122,8 +122,8 @@ const Home = ({ documents }: HomeProps) => {
         {/* <h1 className="text-primaryTextColor text-xl leading-[26px] font-bold pt-[25px] pb-[5px] px-4">{`Hello ${
           user?.name ?? "User"
         },`}</h1> */}
-        <div className="text-2xl font-bold pt-6 pl-4">Requested Documents</div>
-        <div className="flex gap-[14px] p-4">
+        <div className="text-2xl font-bold p-4 pt-0">Requested Documents</div>
+        <div className="flex gap-[14px] px-4 pb-4">
           {StatusMock.map((item) => {
             if(item.status==="All") return;
             return (<div

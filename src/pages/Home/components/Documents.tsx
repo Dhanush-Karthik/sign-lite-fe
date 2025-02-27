@@ -151,6 +151,24 @@ export const Documents = ({ documents }: DocumentsProps) => {
     if (!selectedDocument) return;
 
     if(isPending) {
+      // Confirmation step after user selecting "No, Cancel Request"
+      if(primaryButtonText === "Yes, Continue") {
+        const url = `${API_PATHS.CONTINUE_DOC_TO_CHAT}`.replace("email", selectedDocument!.signer_id);
+        await miniappClient.post(
+          url,
+          JSON.stringify({
+            processInstanceId: selectedDocument!.process_instance_id,
+            taskId: selectedDocument!.task_id,
+            userId: selectedDocument!.signer_id,
+            documentName: selectedDocument!.file_name,
+          })
+        );
+
+        window.location.replace(SECURE_CHAT_SHARE_URL);
+        return;
+      }
+
+      // Confirmation step after user selecting "No, Cancel Request"
       if (primaryButtonText === "Yes, Cancel") {
         try {
           setIsLoading(true);
@@ -175,8 +193,6 @@ export const Documents = ({ documents }: DocumentsProps) => {
 
         return;
       }
-      window.location.replace(SECURE_CHAT_SHARE_URL);
-      return;
     }
 
     try {
@@ -258,7 +274,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
         </div>
       }
       <section title="top">
-        <div className="mb-3 pt-7 px-4">
+        <div className="mb-3  px-4">
           {loading ? (
             <SkeletonBlock
               slot="media"

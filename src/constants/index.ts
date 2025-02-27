@@ -12,6 +12,9 @@ const API_PATHS = {
   GET_ALL_SIGNER_DOCS: "/api/email/assigned-documents",
   GET_DOCUMENT: "/api/email/document/flowInstanceId",
   PUSH_DOC_TO_CHAT: "api/email/push-document",
+  USER_INFO: "api/email/user-info",
+  REVOKE_NECT_VALIDATION: "api/email/reset-ident",
+  CONTINUE_DOC_TO_CHAT: "api/email/continue-flow"
 };
 
 const CALLBACK_URL = window.location.protocol + "//" + window.location.host;
