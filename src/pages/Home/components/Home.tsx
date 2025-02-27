@@ -283,7 +283,7 @@ const Home = ({ documents }: HomeProps) => {
                             {item.status
                             ? {
                                 ABORTED: "Signature request is rejected",
-                                ACTIVE: `Current signer - ${item.activities[0].taskAssignee}`,
+                                ACTIVE: `Current signer - ${item.activities.filter(activity => activity.status === "Active").map(activity => activity.taskAssignee)}`,
                                 ENDED: `Document is signed by all assigners`,
                               }[item.status]
                             : `from ${item.activities[0].taskAssignee}`}
