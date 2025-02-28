@@ -35,6 +35,7 @@ const useOpenid = () => {
       
       if (userInfo) {
         dispatch.auth.setUser(userInfo);
+        localStorage.setItem("username", userInfo.name);
         localStorage.setItem("token", userInfo.access_token);
         setReady(true);
       }
