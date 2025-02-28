@@ -82,6 +82,14 @@ const MainPage = () => {
   const handleRevokeNect = async() => {
     setIsLoading(true);
     email && await dispatch.doc.revokeNectValidation({ email });
+    setUserInfo((prev) => {
+      if (!prev) return prev; 
+  
+      return {
+        ...prev,
+        isIdentVerified: false,
+      };
+    });
     setIsLoading(false);
     setShowProfile(false);
   }
@@ -119,7 +127,7 @@ const MainPage = () => {
           <div className="flex items-center justify-center" onClick={toggleProfile}>
             <img src={HamBurgerIcon} width={"30px"}/>  
           </div>
-          <div className="text-xl">{`Hello ${userInfo?.firstName ? `, ${userInfo.firstName}` : ""}`}</div>
+          <div className="text-xl">{`Hello ${localStorage.getItem("username") ? `, ${localStorage.getItem("username")}` : ""}`}</div>
         </div>
         {
           {
@@ -178,7 +186,7 @@ const MainPage = () => {
                     >
                       <div className="flex items-center space-x-3">
                         <img src={IDCardIcon} alt="" width={"25px"}/>
-                        <span className="text-lg">Nect Validation</span>
+                        <span className="text-lg">Identification status</span>
                       </div>
                       <motion.div
                         animate={{ rotate: isNectOpen ? 180 : 0 }}
@@ -199,11 +207,13 @@ const MainPage = () => {
                         >
                           {
                             userInfo?.isIdentVerified ? (
-                              <button onClick={handleRevokeNect} className="w-full text-left pl-12 p-3 text-red-600 hover:bg-gray-50 rounded-lg transition-colors">
-                                Revoke Nect
-                              </button>
+                              <div className="pl-4 p-2 text-green-600 flex justify-between items-center gap-2">Verified by NECT
+                                <button onClick={handleRevokeNect} className="py-2 px-3 text-white bg-red-500 hover:bg-red-400 rounded-lg transition-colors border">
+                                  Revoke
+                                </button>
+                              </div>
                             ) : (
-                              <div className="pl-12 p-2 text-gray">Identity not verified</div>
+                              <div className="pl-12 p-2 text-red-600">Identity not verified</div>
                             )
                           }
                           
