@@ -82,7 +82,7 @@ type SignerDocType = {
   process_instance_id: string;
   file_name: string;
   task_id: string;
-  status: "INITIATED" | "PENDING" | "COMPLETED" | "FAILED" | "DRAFT";
+  status: "INITIATED" | "PENDING" | "COMPLETED" | "FAILED" | "DRAFT" | "ABORTED";
 }
 
 export type DocType = ReceivedByMeType & SentByMeType & SignerDocType;

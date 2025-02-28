@@ -3,34 +3,79 @@ import Header from "@/components/Header";
 import MyPage from "@/components/MyPage";
 // import { API_BASE_URL, API_PATHS } from "@/constants";
 import { useAppDispatch, useAppSelector } from "@/core/redux/store";
-import { DocType } from "@/types";
 import { Router } from "framework7/types";
 import { useEffect, useState } from "react";
 import { Document, pdfjs, Page as PdfPage } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-export const ViewDoc = ({ f7router, item }: { f7router: Router.Router; item: DocType }) => {
+
+interface AssignedDocumentType {
+  id: string;
+  signer_id: string;
+  process_instance_id: string;
+  requester: string;
+  file_name: string;
+  task_id: string;
+  status: "INITIATED" | "PENDING" | "COMPLETED" | "FAILED" | "DRAFT";
+}
+
+interface RequestedDocumentType {
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  flowInstanceId: string;
+  fileName:string;
+  flowName: string;
+  status: "ABORTED" | "ENDED" | "ACTIVE";
+  executionError?: ExecutionError; // Optional because not all documents have this field
+  activities: Activity[];
+}
+
+interface ExecutionError {
+  taskName: string;
+  taskAssignee: string;
+  error: string;
+}
+
+interface Activity {
+  taskName: string;
+  taskAssignee: string;
+  executionDuration: string;
+  startTime: string;
+  endTime?: string; // Optional since "ACTIVE" status does not have an endTime
+  status: "Ended" | "Active";
+}
+
+export const ViewDoc = ({ f7router, item, requestedItem }: { f7router: Router.Router; item: AssignedDocumentType; requestedItem: RequestedDocumentType }) => {
   const [pageCounts, setPageCounts] = useState(1);
-  const [pdf, setPdf] = useState<string>();
+  const [pdfUrl, setPdfUrl] = useState<string>("");
   const dispatch = useAppDispatch();
 
   const onDocumentLoadSuccess = (pdf: any) => setPageCounts(pdf._pdfInfo.numPages);
 
   const getDoc = async () => {
-    const response = await dispatch.doc.getOneDoc(
-      item.status
-        ? item.status === "COMPLETED"
-          ? { mediaId: item.signers[0].mediaId! }
-          : { fileName: item.file_name }
-        : item.isSigned
-        ? { mediaId: item.mediaId! }
-        : { fileName: item.document.file_name }
-    );
-    setPdf(response);
+    try {
+      const response = await dispatch.doc.getDoc(
+        {
+          email: item?.requester ?? requestedItem?.activities[0]?.taskAssignee,
+          process_instance_id: item?.process_instance_id ?? requestedItem?.flowInstanceId,
+        }
+      );
+
+      if (response) {
+        setPdfUrl(response);
+      }
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+    }
   };
 
   useEffect(() => {
     getDoc();
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
   }, []);
 
   const safeAreas = useAppSelector((state) => state.screen.safeAreas);
@@ -44,10 +89,13 @@ export const ViewDoc = ({ f7router, item }: { f7router: Router.Router; item: Doc
         }}
       >
         <div className="flex-1 overflow-y-auto">
-          {!pdf ? (
-            <p>Loading PDF...</p>
+          {!pdfUrl ? (
+            <>
+              <p>Loading PDF...</p>
+              {/* <p>View PDF is currently unavailable</p> */}
+            </>
           ) : (
-            <Document file={pdf} loading="Loading PDF..." onLoadSuccess={onDocumentLoadSuccess}>
+            <Document file={pdfUrl} loading="Loading PDF..." onLoadSuccess={onDocumentLoadSuccess}>
               {Array.from({ length: pageCounts }, (_, i) => i + 1).map((num) => (
                 <PdfPage
                   pageNumber={num}

@@ -16,6 +16,7 @@
     "@types/pdfjs-dist": "^2.10.378",
     "axios": "^1.7.7",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.4.7",
     "framework7": "^8.3.3",
     "framework7-react": "^8.3.3",
     "jspdf": "^2.5.2",

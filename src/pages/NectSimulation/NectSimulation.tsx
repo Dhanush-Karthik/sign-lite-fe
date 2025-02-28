@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Check, X } from "lucide-react";
+import { SECURE_CHAT_SHARE_URL } from "@/constants";
 
 const NectSimulation: React.FC = () => {
   const [state, setState] = useState("");
@@ -74,7 +75,7 @@ const NectSimulation: React.FC = () => {
         </p>
         <div className="mt-6 space-y-4">
           <button
-            onClick={()=> {window.location.replace('https://share.gondor-shift-qa-fpl6t.gondor.dev.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457')}}
+            onClick={()=> {window.location.replace(SECURE_CHAT_SHARE_URL)}}
             className="flex items-center justify-center w-full py-3 rounded-full bg-green-300 text-black font-semibold text-lg shadow-md hover:bg-green-400 transition"
           >
             Close window

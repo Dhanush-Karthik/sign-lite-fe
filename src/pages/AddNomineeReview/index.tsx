@@ -50,12 +50,14 @@ const AddNomineeReview = ({ f7router }: { f7router: Router.Router }) => {
     
     // Define the output object type
     interface Output {
+      username: string;
       signatureType: string;
       signers: OutputSigner[];
     }
     
     // Initialize the base output object
     const reqBody: Output = {
+      username: user?.name!,
       signatureType: multiDocState?.signatureType!,
       signers: [],
     };

@@ -8,8 +8,13 @@ const API_PATHS = {
   GET_ONE_DOC_MEDIA: "/v1/chat/media",
   GET_ONE_DOC_FILE_NAME: "/v1/document",
   GET_ALL_DOCS: "/v1/document/list",
-  GET_ALL_SIGNER_DOCS: "/api/email/get-documents",
+  GET_REQUESTED_DOCS: "api/email/requester-documents",
+  GET_ALL_SIGNER_DOCS: "/api/email/assigned-documents",
+  GET_DOCUMENT: "/api/email/document/flowInstanceId",
   PUSH_DOC_TO_CHAT: "api/email/push-document",
+  USER_INFO: "api/email/user-info",
+  REVOKE_NECT_VALIDATION: "api/email/reset-ident",
+  CONTINUE_DOC_TO_CHAT: "api/email/continue-flow"
 };
 
 const CALLBACK_URL = window.location.protocol + "//" + window.location.host;
@@ -31,7 +36,7 @@ const CHAT_SERVICE_ID = "0b669933-4742-4c21-8027-78f62d001f8a";
 
 const CHAT_SERVİCE_SHARE_URL = `https://share.mycityapp.cloud.test.kobil.com/kobilservice?sID=${CHAT_SERVICE_ID}`;
 
-const SECURE_CHAT_SHARE_URL = `https://share.gondor-shift-dev-don8u.gondor.dev.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457`;
+const SECURE_CHAT_SHARE_URL = `https://share.gondor-shift-qa-fpl6t.gondor.dev.kobil.com/kobilservice?sID=f93e5f7b-26c3-4b52-8334-c031573f6457`;
 
 export {
   API_PATHS,
