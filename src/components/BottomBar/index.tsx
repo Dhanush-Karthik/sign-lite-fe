@@ -1,5 +1,5 @@
-import { DocumentsIcon } from "@/assets/components/DocumentsIcon";
-import { HomeIcon } from "@/assets/components/HomeIcon";
+import { MailIcon } from "@/assets/components/mailIcon";
+import { SignatureIcon } from "@/assets/components/SignatureIcon";
 import PlusIcon from "@/assets/plusIcon.svg";
 import { Dispatch, SetStateAction } from "react";
 
@@ -16,8 +16,8 @@ const BottomBar = ({ open, setCurrentTab, currentTab }: BottomBarProps) => {
           onClick={() => setCurrentTab("home")}
           className="w-full flex flex-col items-center gap-2"
         >
-          <HomeIcon selected={currentTab === "home"} />
-          <p className="text-mainDarkBlue text-[11px] font-bold leading-3">Requested</p>
+          <SignatureIcon selected={currentTab === "home"} />
+          <p className={`text-[11px] font-bold ${currentTab === 'home' ? 'text-mainDarkBlue': 'text-[#63788E]'} leading-3`}>Signatures</p>
         </div>
       </div>
       <div className=" py-[10px] px-1">
@@ -35,8 +35,8 @@ const BottomBar = ({ open, setCurrentTab, currentTab }: BottomBarProps) => {
           onClick={() => setCurrentTab("documents")}
           className="w-full flex flex-col items-center gap-2"
         >
-          <DocumentsIcon stroke="#63788E" selected={currentTab === "documents"} />
-          <p className="text-[#63788E] text-[11px] font-bold leading-3">Assigned</p>
+          <MailIcon selected={currentTab === "documents"} />
+          <p className={`text-[11px] font-bold ${currentTab === 'documents' ? 'text-mainDarkBlue': 'text-[#63788E]' } leading-3`}>Inbox</p>
         </div>
       </div>
     </section>

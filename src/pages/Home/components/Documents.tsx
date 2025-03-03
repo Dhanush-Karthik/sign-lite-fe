@@ -287,7 +287,7 @@ export const Documents = ({ documents }: DocumentsProps) => {
           ) : (
             <div className="flex flex-col gap-4">
               <div className="text-2xl font-bold">
-                Assigned Requests
+                Inbox
               </div>
               <div className="relative ">
                 <img
