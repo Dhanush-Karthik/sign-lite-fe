@@ -12,7 +12,7 @@ const NectSimulation: React.FC = () => {
 
   const handleSimulateSuccess = () => {
     const code = queryParams["code"];
-    axios.get(`https://shiftpen-frontend.miniapp.cloud.kobil.com/api/v1/nect/callback?code=${code}`)
+    axios.get(`https://shiftpen-api.miniapp.cloud.kobil.com/api/v1/nect/callback?code=${code}`)
       .then(() => {
         setState("success");
       })
@@ -23,7 +23,7 @@ const NectSimulation: React.FC = () => {
 
   const handleSimulateFailure = () => {
     const code = queryParams["code"];
-    axios.get(`https://shiftpen-frontend.miniapp.cloud.kobil.com/api/v1/nect/callback?code=${code}&state=failure`)
+    axios.get(`https://shiftpen-api.miniapp.cloud.kobil.com/api/v1/nect/callback?code=${code}&state=failure`)
       .then(() => {
         setState("failure");
       })
